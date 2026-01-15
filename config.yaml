@@ -1,0 +1,61 @@
+# PROJECT CONFIGURATION
+project_name: "Corporate Text Pipeline - Supply Chain Transparency"
+description: "Automated pipeline for downloading and analyzing 10-K filings for supply chain transparency measures"
+
+# FIRM-YEAR SPECIFICATIONS
+# Your input CSV should have columns: CIK, Year, EventID, TreatmentStatus
+# This allows you to specify exact firm-year combinations around event windows
+firm_list_file: "data/firm_lists/target_firm_years.csv"
+
+# DOWNLOAD SETTINGS
+sec_edgar:
+  rate_limit: 10  # requests per second (SEC limit)
+  user_agent: "william.diebel@moore.sc.edu"  # UPDATE with your actual email
+  filing_types:
+    - "10-K"      # Annual report
+    # - "10-K/A"  # Amended annual report (uncomment if needed)
+  
+# BATCH PROCESSING
+batch_size: 100  # firm-years per batch for your RA to process
+max_retries: 3   # retry failed downloads
+
+# OUTPUT STRUCTURE
+paths:
+  raw_10k: "data/raw/10k"
+  cleaned_text: "data/processed/cleaned"
+  final_scores: "data/processed/scores"
+  logs: "logs"
+  # Note: CSR paths removed - we'll add later if needed
+
+# TEXT EXTRACTION SETTINGS
+text_extraction:
+  # Which sections of 10-K to extract (based on Sodhi & Tang 2019)
+  sections:
+    - "item_1"    # Business description
+    - "item_1a"   # Risk factors (KEY for supply chain disclosures)
+    - "item_7"    # MD&A (Management Discussion & Analysis)
+  
+  # Minimum text length to consider valid (filters out extraction errors)
+  min_text_length: 1000  # characters
+
+# LLM API SETTINGS (will configure when you have API access)
+llm:
+  provider: "claude"  # Options: "claude", "openai", "local"
+  model: "claude-sonnet-4-20250514"
+  api_key_env: "ANTHROPIC_API_KEY"
+  max_tokens: 4096
+  temperature: 0.0  # deterministic for research reproducibility
+
+# SUPPLY CHAIN TRANSPARENCY SCORING DIMENSIONS
+# Based on Bateman & Bonanni (2019) and Sodhi & Tang (2019)
+scoring:
+  dimensions:
+    overall: "Overall supply chain transparency score"
+    environmental: "Environmental disclosure (carbon, water, waste, etc.)"
+    social: "Social/labor disclosure (working conditions, human rights, etc.)"
+    depth: "Supply chain depth (Tier-1 only vs multi-tier)"
+    verification: "Verification level (self-reported vs third-party audited)"
+    quantitative: "Presence of quantitative metrics vs qualitative statements"
+  
+  scale_min: 0
+  scale_max: 10
