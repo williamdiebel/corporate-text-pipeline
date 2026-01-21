@@ -1,11 +1,14 @@
 # GitHub Guide for Corporate Text Pipeline Project
 
+**Author**: Will Diebel
 **Project**: Supply Chain Constructs Measurement Pipeline  
-**Institution**: University of South Carolina, Darla Moore School of Business  
+**Pipeline Development Team**: Will Diebel; Katelyn Thompson (PhD student); Lachlan Carroll (undergrad RA)
 **Status**: Pipeline in Development  
-**Last Updated**: January 2026
+**Last Updated**: January 20, 2026
 
 ---
+
+This doc aims to provide a general overview of our proposed measurement approach and associated data collection / cleaning / analysis pipeline. As the pipeline is still in development and we are waiting on approval for API access to ChatGPT (OpenAI) and / or Claude (Anthropic), this is all subject to change. In any case, please get oriented with the overarching aims / tasks of the project as detailed below as it will help us with the preliminary work that we can complete while waiting for API approval.
 
 ## Table of Contents
 1. [Project Overview and Research Pipeline](#project-overview)
@@ -18,28 +21,22 @@
 
 ### Research Objective
 
-We are measuring **multiple supply chain constructs** for approximately 1,000 manufacturing firms over multiple years:
+**Research Question**: Do supply chain executive appointments increase supply chain transparency? What management practices mediate/moderate this relationship?
 
-**Primary outcomes (Transparency constructs)**:
+To answer our research question, we are aiming to develop **multiple text-derived measures (below)** for approximately 1,100 US manufacturing firms over multiple years (2006 to 2022). Since not all firms exist in all years, we have estimated that we'll need to collect information to develop measures for 8,673 unique firm-year combinations:
+
+**Primary outcome measures (Transparency constructs)**:
 - Supply Chain Transparency (aggregate)
 - Environmental Supply Chain Transparency
 - Social Supply Chain Transparency  
 - Supply Base Transparency
 
-**Mechanism variables (Management practices)**:
+**Mechanistic variable measures (Management practices)**:
 - Digital Transformation
 - Supplier Audits
 - Supplier Code of Conduct
 - Supply Base Reconfiguration
 - Supplier Development
-
-**Research Question**: Do supply chain executive appointments increase supply chain transparency? What management practices mediate/moderate this relationship?
-
-**Why this matters**: 
-- Investors assessing ESG risks and governance quality
-- Understanding how organizational changes affect disclosure behavior
-- Identifying mechanisms that link leadership to transparency outcomes
-- Academic research on corporate disclosure and supply chain management
 
 ### Our Measurement Approach
 
