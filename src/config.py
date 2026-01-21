@@ -18,19 +18,27 @@ PROJECT_ROOT = Path(__file__).parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config.yaml"
 
 
-def load_config():
+def load_config(config_path=None):
     """
     Load configuration from config.yaml file.
-    
+
+    Args:
+        config_path (str, optional): Path to config file. Defaults to config.yaml in project root.
+
     Returns:
         dict: Configuration dictionary with all settings
     """
-    with open(CONFIG_PATH, 'r') as f:
+    if config_path is None:
+        config_path = CONFIG_PATH
+    else:
+        config_path = Path(config_path)
+
+    with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
-    
+
     # Add project root to config for easy path construction
     config['project_root'] = str(PROJECT_ROOT)
-    
+
     return config
 
 
