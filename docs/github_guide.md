@@ -1,9 +1,10 @@
 # GitHub Guide for Corporate Text Pipeline Project
 
-**Author**: Will Diebel  
-**Project**: Supply Chain Constructs Measurement Pipeline  
-**Pipeline Development Team**: Will Diebel; Katelyn Thompson; Lachlan Carroll 
-**Status**: In Development  
+**Author**: Will Diebel
+**Project**: Supply Chain Constructs Measurement Pipeline
+**Pipeline Development Team**: Will Diebel; Katelyn Thompson; Lachlan Carroll
+
+**Status**: In Development
 **Last Updated**: January 21, 2026  
 
 ---
