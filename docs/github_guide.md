@@ -2,14 +2,14 @@
 
 **Author**: Will Diebel
 **Project**: Supply Chain Constructs Measurement Pipeline
-**Pipeline Development Team**: Will Diebel; Katelyn Thompson (PhD student); Lachlan Carroll (undergrad RA)
+**Pipeline Development Team**: Will Diebel; Katelyn Thompson; Lachlan Carroll
 
-**Status**: Pipeline in Development
-**Last Updated**: January 20, 2026  
+**Status**: In Development
+**Last Updated**: January 21, 2026
 
 ---
 
-This doc aims to provide a general overview of our proposed measurement approach and associated data collection / cleaning / analysis pipeline. As the pipeline is still in development and we are waiting on approval for API access to ChatGPT (OpenAI) and / or Claude (Anthropic), this is all subject to change. In any case, please get oriented with the overarching aims / tasks of the project as detailed below as it will help us with the preliminary work that we can complete while waiting for API approval.
+This doc aims to provide a general overview of our proposed measurement approach and associated data collection / cleaning / analysis pipeline. As the pipeline is still in development and we are waiting on approval for API access to ChatGPT (OpenAI) and / or Claude (Anthropic), this is all subject to modification, though the general structure should be flexible enough to accommodate any such changes. In any case, please get oriented with the overarching aims / tasks of the project as detailed below as it will help us with the preliminary work that we can complete while waiting for API approval.
 
 ## Table of Contents
 1. [Project Overview and Research Pipeline](#project-overview)
@@ -22,9 +22,9 @@ This doc aims to provide a general overview of our proposed measurement approach
 
 ### Research Objective
 
-**Research Question**: Do supply chain executive appointments increase supply chain transparency? What management practices mediate/moderate this relationship?
+**Research Question**: Do supply chain executive appointments increase supply chain transparency? What management practices moderate this relationship?
 
-To answer our research question, we are aiming to develop **multiple text-derived measures (below)** for approximately 1,100 US manufacturing firms over multiple years (2006 to 2022). Since not all firms exist in all years, we have estimated that we'll need to collect information to develop measures for 8,673 unique firm-year combinations:
+To answer our research question, we are aiming to develop **multiple text-derived measures (below)** for 1,100 US manufacturing firms over multiple years (2006 to 2022). Since not all firms exist in all years, we have estimated that we'll need to collect information to develop measures for 8,673 unique firm-year combinations:
 
 **Primary outcome measures (Transparency constructs)**:
 - Supply Chain Transparency (aggregate)
@@ -62,15 +62,15 @@ Our pipeline consists of 5 major stages:
 Raw Documents → Text Extraction → Text Cleaning → LLM Scoring → Analysis Dataset
 ```
 
-Let me break down each stage:
+The following elaborates on each stage:
 
 ---
 
 #### **Stage 1: Document Collection**
-**What**: Download 10-K filings from SEC EDGAR and CSR reports from company websites  
+**What**: Download 10-K filings from SEC EDGAR (and CSR reports from company websites - TBD)  
 **Input**: List of firm-year observations (CIK-Year combinations)  
 **Output**: Raw HTML/PDF files organized by firm and year  
-**Your role**: Monitor download progress, flag errors, verify completeness
+**Your roles**: Run scripts, monitor download progress, flag errors, verify completeness
 
 **Key files**:
 - `scripts/download_10k.py` - Downloads 10-Ks from SEC EDGAR
@@ -81,7 +81,7 @@ Let me break down each stage:
 - SEC EDGAR API has rate limits (10 requests/second)
 - Each 10-K is ~50-100 pages of HTML
 - Process runs in batches of 100 firms
-- Takes ~2-3 hours for 1,000 firm-years
+- Takes an estimated ~2-3 hours for 1,000 firm-years
 
 ---
 
@@ -89,9 +89,9 @@ Let me break down each stage:
 **What**: Extract relevant text from HTML/PDF files  
 **Input**: Raw 10-K HTML files  
 **Output**: Plain text files containing key sections  
-**Your role**: Quality check - ensure text extraction didn't fail
+**Your roles**: Run scripts and complete manual quality checks on output to ensure text extraction didn't fail
 
-**Key sections extracted** (based on Sodhi & Tang 2019):
+**Key sections extracted**:
 - **Item 1** (Business Description): Supply chain structure
 - **Item 1A** (Risk Factors): Supply chain risks and dependencies
 - **Item 7** (MD&A): Management discussion of supply chain initiatives
@@ -99,7 +99,7 @@ Let me break down each stage:
 **Why only these sections?**  
 - These contain 95%+ of supply chain disclosures
 - Reduces text volume for LLM processing (saves cost/time)
-- Based on validated approach from literature
+- Based on validated approach from literature (e.g., Astvansh & Simpson, 2025; Maibaum et al., 2024)
 
 **Key files**:
 - `src/processors/text_cleaner.py` - Extracts text from HTML
@@ -111,7 +111,7 @@ Let me break down each stage:
 **What**: Remove boilerplate, tables, and irrelevant content  
 **Input**: Raw extracted text  
 **Output**: Clean text focused on supply chain content  
-**Your role**: Review samples to ensure quality
+**Your roles**: Run scripts and review samples to ensure quality
 
 **What gets removed**:
 - Financial tables and numeric data
@@ -133,10 +133,10 @@ Let me break down each stage:
 ---
 
 #### **Stage 4: LLM Scoring**
-**What**: Use AI (Claude/ChatGPT) to score supply chain constructs  
+**What**: Use AI (ChatGPT/Claude) to score supply chain constructs  
 **Input**: Clean text for each firm-year  
-**Output**: Numeric scores (0-10) across 9 constructs  
-**Your role**: Validate through manual pilot study (see separate protocol)
+**Output**: Numeric scores (0-100) across 9 constructs  
+**Your role**: Validate through manual pilot study (completed in parallel, as led by Katelyn)
 
 **The 9 measured constructs**:
 
@@ -144,7 +144,7 @@ Let me break down each stage:
 1. **Supply Chain Transparency (Aggregate)**: Overall upstream disclosure
 2. **Environmental SCT**: Environmental impacts/risks in supply chain
 3. **Social SCT**: Social impacts/risks in supply chain
-4. **Supply Base Transparency**: Disclosure about tier-1 suppliers
+4. **Supply Base Transparency**: Disclosures pertaining to tier-1 suppliers
 
 *Mechanism Constructs (Moderators/Mediators):*
 5. **Digital Transformation**: Adoption of supply chain technologies
@@ -154,10 +154,10 @@ Let me break down each stage:
 9. **Supplier Development**: Efforts to improve supplier capabilities
 
 **How it works**:
-1. Feed firm's cleaned 10-K text to LLM (e.g., Claude API)
+1. Feed firm's cleaned 10-K text to LLM (e.g., OpenAI API)
 2. LLM reads text and applies scoring rubrics for all 9 constructs
 3. LLM returns structured scores + brief justifications
-4. Repeat for all ~1,000 firm-years
+4. Repeat for all 8,673 firm-years
 
 **Key files**:
 - `src/scorers/llm_scorer.py` - Main scoring logic
@@ -185,10 +185,10 @@ CIK, Year,
 SCT_Aggregate, SCT_Environmental, SCT_Social, SupplyBase_Transparency,
 Digital_Transformation, Supplier_Audits, Supplier_CodeOfConduct, 
 SupplyBase_Reconfiguration, Supplier_Development,
-Has10K, TextLength, ExtractionDate, ...
+Has10K, TextLength, ...
 ```
 
-**This dataset gets merged with your other data** (treatment/control status, event IDs, financial variables, etc.) for the stacked DiD analysis examining how supply chain executive appointments affect transparency, and what mechanisms moderate/mediate this relationship.
+**This dataset gets merged with our other data** (treatment/control status, appointment/event IDs, financial variables, etc.) for the stacked DiD analysis(Wang et al., 2024) examining how supply chain executive appointments affect transparency, and what mechanisms moderate this relationship.
 
 **Key files**:
 - `scripts/create_analysis_dataset.py` - Assembles final data
@@ -196,24 +196,26 @@ Has10K, TextLength, ExtractionDate, ...
 
 ---
 
-### Your Role in the Pipeline
+### Your Roles in the Pipeline (to be further clarified as we progress)
 
-**Katelyn (PhD Student)**:
+**Katelyn**:
 - **Lead** pilot validation study
 - **Develop** detailed scoring rubrics for all constructs
-- **Run** full pipeline on server/local machine
+- **Run** full pipeline on server/local machine in coordination with Lachlan (divide and conquer)
 - **Troubleshoot** technical issues
 - **Validate** output quality at each stage
 - **Document** any deviations or decisions
 
-**Lachlan (Undergraduate RA)**:
+**Lachlan**:
 - **Participate** in pilot validation (manual scoring)
+- **Run** full pipeline on server/local machine in coordination with Katelyn
 - **Monitor** batch downloads (track progress, flag errors)
 - **Quality check** random samples at each stage
-- **Generate** summary statistics
 - **Report** completion status to team
 
-**PI**:
+**Will**:
+- **Develop** pipeline architecture and pilot scripts
+- **Supervise and Troubleshoot** pipeline implementation
 - **Review** validation results
 - **Approve** methodology decisions
 - **Oversee** overall progress
@@ -222,13 +224,12 @@ Has10K, TextLength, ExtractionDate, ...
 
 ### Timeline Overview
 
-**Week 1-2**: Pilot validation study (manual scoring of sample)  
-**Week 3**: Finalize methodology based on pilot results  
-**Week 4-5**: Run full pipeline (download → extract → clean → score)  
-**Week 6**: Data validation and assembly  
-**Week 7+**: Analysis with merged dataset
+This is ambitious but I think we can do it...
 
-**Critical path**: Pilot study must be completed before full LLM scoring begins.
+**Week 1-2**: Pilot validation study (manual scoring of sample); pilot and run 10-k downloads
+**Week 3-4**: Pilot and run text extraction and cleaning scripts
+**Week 5-6**: Pilot and run LLM scoring  
+**Week 7-8+**: Merge and analyze dataset
 
 ---
 
@@ -276,17 +277,15 @@ corporate-text-pipeline/
 
 ### Questions to Orient Yourself
 
-Before diving into work, ask yourself:
+If you're unsure before diving into work on any given day, check in with the team. We should communicate regularly enough to remain aligned on the following:
 
-1. **What stage are we at?** (Download? Cleaning? Scoring?)
-2. **What's my specific task this week?** (Check Slack/email)
-3. **What files do I need to work with?** (Input/output locations)
-4. **Who do I ask if stuck?** (Technical → PhD; Conceptual → PI)
-5. **When is my deliverable due?** (Check project timeline)
+1. **Knowing what stage are we at with respect to overarching plan** 
+2. **Understand the specific tasks each other are focusing on in a given week**
+3. **Knowing what files to use, how to document progress, and being aware of when to pull/push work from/to GitHub** 
 
 ---
 
-**Next**: Let's get you set up with GitHub so you can access all this code...
+**Next**: Let's get you set up with GitHub so you can access all this code (still in development)...
 
 ---
 
@@ -297,7 +296,7 @@ GitHub is a platform for storing and managing code collaboratively. Think of it 
 
 ### Key Concepts
 
-**Repository (Repo)**: The project folder containing all our code and files. Our repo is called `corporate-text-pipeline`.
+**Repository (Repo)**: The project folder containing all our code and files. Our repo is called `corporate-text-pipeline`. Once you've created a GitHub account, please share your username/email with me so I can add you as a repo collaborator.
 
 **Commit**: A saved snapshot of your changes with a descriptive message. Like saving a version of a document with notes about what changed.
 
@@ -309,7 +308,7 @@ GitHub is a platform for storing and managing code collaboratively. Think of it 
 
 ### Why We're Using GitHub for This Project
 
-1. **Collaboration**: Three people (PI, PhD student, RA) can work on different parts simultaneously
+1. **Collaboration**: The three of us can work on different parts simultaneously
 2. **Version Control**: We can track every change, see who made it, and why
 3. **Backup**: All our work is safely stored in the cloud
 4. **Reproducibility**: Other researchers can see exactly how we built our pipeline
@@ -346,9 +345,7 @@ This identifies you in all future commits.
 
 ### Step 3: Get Access to the Repository
 
-Ask the PI for:
-1. The GitHub repository URL (likely: `https://github.com/USERNAME/corporate-text-pipeline`)
-2. Collaborator access to the repository
+As mentioned above, once you're setup I can add you as a collaborator to the repo.
 
 ### Step 4: Clone the Repository to Your Computer
 
@@ -366,7 +363,7 @@ cd corporate-text-pipeline
 
 **Option B: Using VS Code**
 1. Open VS Code
-2. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows)
+2. Open the command pallette: press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows)
 3. Type "Git: Clone" and select it
 4. Paste the repository URL
 5. Choose where to save it
@@ -411,7 +408,7 @@ You should see `(venv)` at the start of your terminal prompt.
 git pull origin main
 ```
 
-This downloads any changes others have made since you last worked.
+This downloads any changes others have made to main since you last worked.
 
 ### While You're Working
 
@@ -452,6 +449,7 @@ git commit -m "Brief description of what you did"
 ```bash
 git push origin main
 ```
+Step 2 and 3 can also be completed using the UI in VS Code (see the source control tab on left side column menu) .
 
 **Step 4: Verify on GitHub**
 Go to the repository URL in your browser and confirm your changes appear.
@@ -537,7 +535,7 @@ git checkout <commit-hash> filename.py
 
 These should already be in `.gitignore`, but double-check.
 
-**Files you SHOULD commit:**
+**Files you SHOULD commit (this will mostly be me, your job will largely be to run the scripts):**
 - All Python scripts (`.py` files)
 - Configuration files (`config.yaml`, `requirements.txt`)
 - Documentation (`.md` files, this guide)
@@ -556,6 +554,7 @@ git add .
 git commit -m "Descriptive message"
 git push origin main
 ```
+You can also complete the above using the UI in VS Code.
 
 **If you're unsure about changes:**
 ```bash
@@ -660,7 +659,7 @@ git checkout -- file.py       # Discard changes to a file
 
 - [ ] Install Git, VS Code, Python
 - [ ] Configure Git with your name and email
-- [ ] Get repository access from PI
+- [ ] Get repository access from me
 - [ ] Clone the repository
 - [ ] Set up virtual environment
 - [ ] Install dependencies (`pip install -r requirements.txt`)
@@ -670,4 +669,4 @@ git checkout -- file.py       # Discard changes to a file
 
 ---
 
-**Welcome to the team! If you have questions about any of this, don't hesitate to ask.**
+**If you have questions about any of this, don't hesitate to ask.**
