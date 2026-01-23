@@ -5,7 +5,7 @@
 **Pipeline Development Team**: Will Diebel; Katelyn Thompson; Lachlan Carroll
 
 **Status**: In Development
-**Last Updated**: January 21, 2026  
+**Last Updated**: January 21, 2026
 
 ---
 

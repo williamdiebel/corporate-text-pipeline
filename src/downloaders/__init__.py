@@ -5,5 +5,6 @@ This module contains classes for downloading corporate filings and reports.
 """
 
 from .sec_downloader import SECDownloader
+from .csr_downloader import CSRDownloader, download_csr_report
 
-__all__ = ['SECDownloader']
+__all__ = ['SECDownloader', 'CSRDownloader', 'download_csr_report']
