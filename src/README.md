@@ -1,23 +1,121 @@
-# Source Code (`src/`) Directory
+# src/ - Pipeline Library
 
-This directory contains the core pipeline modules for downloading, processing, and analyzing 10-K filings.
+**Reusable modules for downloading, processing, and validating 10-K filings**
 
-## Directory Structure
+---
+
+## 📚 What's in This Folder?
 
 ```
 src/
-├── __init__.py              # Package initialization
-├── config.py                # Configuration loader
-├── downloaders/             # Download modules
-│   ├── sec_downloader.py   # SEC EDGAR 10-K downloader
-│   └── csr_downloader.py   # CSR report downloader (Phase 2)
-├── processors/              # Text processing modules
-│   ├── parser.py           # 10-K section extraction
-│   └── text_cleaner.py     # Text cleaning and normalization
-└── utils/                   # Utility functions
-    ├── logging_utils.py    # Logging setup
-    └── validators.py       # Data validation functions
+├── downloaders/     # Download 10-K filings from SEC EDGAR
+├── processors/      # Parse and clean extracted text
+├── utils/           # Validation and logging utilities
+└── config.py        # Configuration loader
 ```
+
+---
+
+## 🎯 For Students & Research Assistants
+
+**You typically DON'T need to look in this folder!**
+
+These are the "under the hood" modules that make the scripts work. You'll use the scripts in the `scripts/` folder instead.
+
+### When to Look Here
+
+- ✅ You're curious how the downloader works
+- ✅ You need to understand what a function does
+- ✅ Will asks you to check something in the source code
+
+### When NOT to Look Here
+
+- ❌ You just want to download files → Use `scripts/download_10k.py`
+- ❌ You want to process files → Use `scripts/process_batch.py`
+- ❌ You want to validate data → Use `scripts/validate_data.py`
+
+---
+
+## 📖 Quick Reference
+
+### Using the Library (For Advanced Users)
+
+If you want to use these modules in your own Python code:
+
+```python
+from src.downloaders import SECDownloader
+from src.processors import TenKParser, TextCleaner
+
+# Download a specific filing
+downloader = SECDownloader(user_agent="your@email.com", output_dir="data/raw/10k")
+success, filepath = downloader.download_10k(cik="1750", year=2020)
+
+# Parse it
+parser = TenKParser()
+sections = parser.parse_file(filepath)
+
+# Clean the text
+cleaner = TextCleaner()
+clean_text = cleaner.clean(sections['item_1a'])
+```
+
+---
+
+## 📋 Module Documentation
+
+### Downloaders
+
+**What it does**: Downloads 10-K filings from SEC EDGAR
+
+**Key class**: `SECDownloader`
+
+**Used by**: `download_10k.py` script
+
+### Processors
+
+**What it does**: Extracts and cleans text from 10-K files
+
+**Key classes**: `TenKParser`, `TextCleaner`
+
+**Used by**: `process_batch.py` script
+
+### Utils
+
+**What it does**: Validates data and sets up logging
+
+**Key functions**: `validate_10k_file()`, `validate_firm_list()`, `setup_logging()`
+
+**Used by**: All scripts
+
+---
+
+## 🔍 Main Documentation
+
+For comprehensive project documentation, see:
+
+- **[Main README](../README.md)** - Project overview and quick start
+- **[Setup Guide](../docs/SETUP.md)** - Installation instructions
+- **[Scripts README](../scripts/README.md)** - How to run scripts
+
+---
+
+## 💡 Understanding src/ vs scripts/
+
+**Think of it this way:**
+
+- **`src/`** = Toolbox (individual tools you can combine)
+- **`scripts/`** = Pre-built solutions (ready-to-use programs)
+
+**Example:**
+
+- **src/downloaders/sec_downloader.py** = A screwdriver (tool)
+- **scripts/download_10k.py** = A pre-assembled shelf (solution)
+
+You usually want the pre-assembled shelf, not individual tools!
+
+---
+
+**Last Updated**: January 2026
 
 ## Modules Overview
 
