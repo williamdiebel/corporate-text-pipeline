@@ -69,15 +69,15 @@ Think of it like having a separate toolbox for each project.
 
 ### File Organization Analogy
 ```
-corporate-text-pipeline/     ← The project folder (like a filing cabinet)
-├── src/                     ← The tools/library (like a toolbox)
+corporate-text-pipeline/     ← The project folder
+├── src/                     ← The tools/library 
 │   ├── downloaders/        ← Tools for downloading
 │   ├── processors/         ← Tools for processing text
 │   └── utils/              ← Helper tools
-├── scripts/                ← Ready-to-use programs (like pre-set tools)
-├── data/                   ← Where we store files (like file drawers)
+├── scripts/                ← Ready-to-use programs (we'll use these -- automatically accesses tools in library)
+├── data/                   ← Where we store files
 ├── docs/                   ← Instruction manuals
-└── tests/                  ← Quality checks (like testing tools)
+└── tests/                  ← Quality checks
 ```
 
 ---
@@ -477,11 +477,11 @@ sec_edgar:
 
 ## 👥 Team
 
-**Principal Investigator**: Will Diebel (william.diebel@moore.sc.edu)
+**Assistant Professor**: Will Diebel (william.diebel@moore.sc.edu)
 
-**PhD Student**: Katelyn Thompson
+**PhD Student**: Katelyn Thompson (katelyn.thompson@grad.moore.sc.edu)
 
-**Undergraduate RA**: Lachlan Carroll
+**Undergraduate RA**: Lachlan Carroll (ldc2@email.sc.edu)
 
 **Institution**: University of South Carolina - Darla Moore School of Business
 
