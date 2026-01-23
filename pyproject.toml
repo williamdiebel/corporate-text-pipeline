@@ -1,11 +1,14 @@
 # Modern Python Project Configuration
 # This file replaces the old setup.py and requirements.txt files
+# It's the new standard way (since 2021) to configure Python projects
 
 [build-system]
+# Tools needed to build/install this project
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
+# Basic project information
 name = "corporate-text-pipeline"
 version = "0.1.0"
 description = "Automated pipeline for measuring supply chain transparency from 10-K filings"
@@ -19,60 +22,82 @@ authors = [
 ]
 keywords = ["supply-chain", "transparency", "10-k", "sec-edgar", "text-analysis"]
 
+# Main dependencies needed to run the pipeline
 dependencies = [
+    # Web scraping and downloading
     "requests>=2.31.0",
     "beautifulsoup4>=4.12.0",
     "lxml>=4.9.0",
     "sec-edgar-downloader>=5.0.0",
+
+    # Data processing
     "pandas>=2.0.0",
     "numpy>=1.24.0",
+
+    # Text processing
     "nltk>=3.8.0",
     "textblob>=0.17.0",
+
+    # File handling (for different file formats)
     "PyPDF2>=3.0.0",
     "python-docx>=1.1.0",
     "openpyxl>=3.1.0",
+
+    # Configuration and utilities
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
-    "tqdm>=4.66.0",
-    "tenacity>=8.2.0",
-    "jsonschema>=4.19.0",
-    "colorlog>=6.7.0",
+    "tqdm>=4.66.0",          # Progress bars
+    "tenacity>=8.2.0",       # Retry logic
+    "jsonschema>=4.19.0",    # Data validation
+    "colorlog>=6.7.0",       # Colored logging
 ]
 
+# Optional dependencies for different use cases
 [project.optional-dependencies]
+# For developers: testing and code quality tools
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "ipython>=8.12.0",
 ]
+
+# For data analysis: Jupyter notebooks and plotting
 analysis = [
     "jupyter>=1.0.0",
     "ipykernel>=6.25.0",
     "matplotlib>=3.7.0",
     "seaborn>=0.12.0",
 ]
+
+# Install everything (for the full experience)
 all = [
     "corporate-text-pipeline[dev,analysis]",
 ]
 
+# Command-line tools that get installed
+# These let you run commands like "download-10k" instead of "python scripts/download_10k.py"
 [project.scripts]
 download-10k = "scripts.download_10k:main"
 process-batch = "scripts.process_batch:main"
 validate-data = "scripts.validate_data:main"
 
+# Project URLs
 [project.urls]
 Homepage = "https://github.com/williamdiebel/corporate-text-pipeline"
 Repository = "https://github.com/williamdiebel/corporate-text-pipeline"
 Issues = "https://github.com/williamdiebel/corporate-text-pipeline/issues"
 
+# Tell setuptools where to find our code
 [tool.setuptools]
 packages = ["src", "src.downloaders", "src.processors", "src.utils"]
 
+# Pytest configuration (testing tool)
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src --cov-report=html --cov-report=term"
 
+# Coverage configuration (measures how much code is tested)
 [tool.coverage.run]
 source = ["src"]
 omit = ["*/tests/*", "*/venv/*"]

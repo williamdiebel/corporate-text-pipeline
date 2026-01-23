@@ -1,404 +1,298 @@
-# Scripts Directory
+# scripts/ - Ready-to-Use Programs
 
-Executable scripts for running the pipeline.
+**The scripts you'll actually run to download and process 10-K filings**
 
-## Available Scripts
+---
 
-### 1. `download_10k.py` - Download 10-K Filings
+## 🎯 For Students & Research Assistants
 
-Downloads 10-K filings from SEC EDGAR.
+**This is where you'll spend most of your time!** These are the programs you run to do your work.
 
-**Usage**:
-```bash
-# Download all firm-years from config
-python scripts/download_10k.py
+---
 
-# Download first 100
-python scripts/download_10k.py --batch-size 100
+## 📚 What's in This Folder?
 
-# Resume from index 500
-python scripts/download_10k.py --start-index 500 --batch-size 100
-
-# Override output directory
-python scripts/download_10k.py --output-dir custom/directory
-
-# Re-download existing files
-python scripts/download_10k.py --no-skip-existing
 ```
-
-**Options**:
-- `--batch-size N`: Number of firm-years to process
-- `--start-index N`: Starting index in firm list
-- `--skip-existing`: Skip already downloaded files (default)
-- `--no-skip-existing`: Re-download existing files
-- `--config PATH`: Config file path (default: config.yaml)
-- `--output-dir PATH`: Override output directory
-- `--log-level LEVEL`: Logging level (DEBUG/INFO/WARNING/ERROR)
-
-**Output**:
-- Downloaded files: `data/raw/10k/{CIK}_{YEAR}_10K.html`
-- Logs: `data/raw/10k/download_logs/`
-- Application logs: `logs/download_10k_*.log`
-
-**Example**:
-```bash
-# Download first batch of 50 for testing
-python scripts/download_10k.py --batch-size 50
-
-# Check results
-cat data/raw/10k/download_logs/summary_*.txt
+scripts/
+├── download_10k.py      # Download 10-K filings from SEC
+├── process_batch.py     # Parse and clean downloaded files
+└── validate_data.py     # Check data quality
 ```
 
 ---
 
-### 2. `process_batch.py` - Process Downloaded Files
+## 🚀 The Three Scripts You'll Use
 
-Parses and cleans downloaded 10-K files.
+### 1. Download 10-Ks (`download_10k.py`)
 
-**Usage**:
+**What it does**: Downloads 10-K filings from the SEC website
+
+**When to use it**: When you need to download new filings
+
+**Basic command**:
+```bash
+# Download first 10 files (for testing)
+download-10k --batch-size 10
+
+# Download first 100 files
+download-10k --batch-size 100
+
+# Download all files from the firm list
+download-10k
+```
+
+**What you'll see**:
+```
+Downloading 10 10-K filings...
+Progress: 10/10 | Success: 10 | Failed: 0
+Download Complete!
+```
+
+**Where files go**: `data/raw/10k/`
+
+---
+
+### 2. Process Files (`process_batch.py`)
+
+**What it does**: Extracts and cleans text from downloaded 10-Ks
+
+**When to use it**: After downloading, to get clean text sections
+
+**Basic command**:
 ```bash
 # Process all downloaded files
-python scripts/process_batch.py
+process-batch
 
-# Process specific directories
-python scripts/process_batch.py --input-dir data/raw/10k --output-dir data/processed/cleaned
-
-# Process first 50 files
-python scripts/process_batch.py --batch-size 50
-
-# Extract only Item 1A (Risk Factors)
-python scripts/process_batch.py --sections item_1a
-
-# Skip cleaning step (keep raw extracted text)
-python scripts/process_batch.py --no-clean
+# Process first 10 files (for testing)
+process-batch --batch-size 10
 ```
 
-**Options**:
-- `--input-dir PATH`: Input directory with raw 10-K files
-- `--output-dir PATH`: Output directory for processed text
-- `--batch-size N`: Number of files to process
-- `--skip-existing`: Skip already processed files (default)
-- `--sections LIST`: Comma-separated sections (item_1,item_1a,item_7)
-- `--min-section-length N`: Minimum section length (default: 1000)
-- `--clean`: Clean extracted text (default)
-- `--no-clean`: Skip text cleaning
-- `--log-level LEVEL`: Logging level
-
-**Output**:
-- Processed files: `data/processed/cleaned/{CIK}_{YEAR}_10K_{SECTION}.txt`
-- Logs: `data/processed/cleaned/processing_logs/`
-- Application logs: `logs/process_batch_*.log`
-
-**Example**:
-```bash
-# Process all downloads
-python scripts/process_batch.py
-
-# Check results
-head -n 50 data/processed/cleaned/0000001750_2020_10K_item_1a.txt
+**What you'll see**:
 ```
+Processing 10 files...
+Progress: 10/10 | Success: 10 | Failed: 0
+Processing Complete!
+```
+
+**Where files go**: `data/processed/cleaned/`
 
 ---
 
-### 3. `validate_data.py` - Validate Pipeline Data
+### 3. Validate Data (`validate_data.py`)
 
-Validates data quality at each pipeline stage.
+**What it does**: Checks that everything downloaded and processed correctly
 
-**Usage**:
+**When to use it**: To verify data quality and find problems
+
+**Basic command**:
 ```bash
 # Validate everything
-python scripts/validate_data.py
+validate-data
 
+# Generate detailed report
+validate-data --report
+```
+
+**What you'll see**:
+```
+Validation Summary:
+✓ Firm list: Valid (8,673 firm-years)
+✓ Downloads: 8,500/8,673 (98.0%)
+✓ Processed: 8,400/8,500 (98.8%)
+```
+
+---
+
+## 📋 Common Workflow
+
+**Step 1: Download** (Takes 10-30 minutes for full dataset)
+```bash
+download-10k --batch-size 100
+```
+
+**Step 2: Process** (Takes 5-10 minutes)
+```bash
+process-batch
+```
+
+**Step 3: Validate** (Takes 1-2 minutes)
+```bash
+validate-data --report
+```
+
+**Step 4: Check Results**
+```bash
+# Look at downloaded files
+ls data/raw/10k/
+
+# Look at processed files
+ls data/processed/cleaned/
+
+# Read the validation report
+cat validation_reports/validation_report_*.txt
+```
+
+---
+
+## 💡 Tips for Students
+
+### Starting Your Work Session
+
+```bash
+# 1. Navigate to project
+cd ~/Documents/corporate-text-pipeline
+
+# 2. Activate virtual environment
+source venv/bin/activate  # Mac/Linux
+# OR
+venv\Scripts\activate     # Windows
+
+# 3. Run your commands
+download-10k --batch-size 50
+```
+
+### Testing Before Full Run
+
+**Always test with a small batch first!**
+
+```bash
+# Download just 10 files
+download-10k --batch-size 10
+
+# Process just those 10 files
+process-batch --batch-size 10
+
+# Validate
+validate-data
+```
+
+If the test works, then run the full batch.
+
+### If Something Fails
+
+1. **Check the logs**:
+   ```bash
+   ls logs/
+   tail -n 50 logs/download_10k_*.log
+   ```
+
+2. **Run validation**:
+   ```bash
+   validate-data --report
+   ```
+
+3. **Ask Will for help** with the error message from the logs
+
+---
+
+## 🔍 Understanding Output
+
+### Downloads Create These Files
+
+```
+data/raw/10k/
+├── 0000001750_2020_10K.html        # Raw 10-K filing
+├── 0000001750_2021_10K.html
+└── download_logs/
+    ├── successful_*.csv            # List of successful downloads
+    ├── failed_*.csv                # List of failed downloads
+    └── summary_*.txt               # Summary statistics
+```
+
+### Processing Creates These Files
+
+```
+data/processed/cleaned/
+├── 0000001750_2020_10K_item_1.txt     # Business section
+├── 0000001750_2020_10K_item_1a.txt    # Risk Factors section
+├── 0000001750_2020_10K_item_7.txt     # MD&A section
+└── processing_logs/
+    ├── processing_results_*.csv       # Processing results
+    └── processing_summary_*.txt       # Summary statistics
+```
+
+---
+
+## 📖 Advanced Options (Optional)
+
+### Download Script Options
+
+```bash
+# Resume from a specific position
+download-10k --start-index 500 --batch-size 100
+
+# Re-download existing files
+download-10k --no-skip-existing
+
+# Use different output directory
+download-10k --output-dir custom/directory
+```
+
+### Process Script Options
+
+```bash
+# Extract only Risk Factors (Item 1A)
+process-batch --sections item_1a
+
+# Skip the cleaning step
+process-batch --no-clean
+
+# Process specific input directory
+process-batch --input-dir data/raw/10k --output-dir data/processed/cleaned
+```
+
+### Validate Script Options
+
+```bash
 # Validate only downloads
-python scripts/validate_data.py --stage downloads
+validate-data --stage downloads
 
 # Validate only processed files
-python scripts/validate_data.py --stage processed
-
-# Generate detailed report
-python scripts/validate_data.py --report
-
-# Validate specific directories
-python scripts/validate_data.py \
-  --firm-list data/firm_lists/target_firm_years.csv \
-  --downloads-dir data/raw/10k \
-  --processed-dir data/processed/cleaned
-```
-
-**Options**:
-- `--stage STAGE`: Which stage to validate (downloads/processed/all)
-- `--firm-list PATH`: Path to firm list CSV
-- `--downloads-dir PATH`: Downloads directory
-- `--processed-dir PATH`: Processed files directory
-- `--report`: Generate detailed validation report
-- `--output-dir PATH`: Report output directory
-- `--config PATH`: Config file path
-- `--log-level LEVEL`: Logging level
-
-**Output**:
-- Console summary of validation results
-- Optional detailed report: `validation_reports/validation_report_*.txt`
-- Application logs: `logs/validate_data_*.log`
-
-**Example**:
-```bash
-# Validate all data
-python scripts/validate_data.py
-
-# Generate detailed report
-python scripts/validate_data.py --report
-
-# View report
-cat validation_reports/validation_report_*.txt
+validate-data --stage processed
 ```
 
 ---
 
-## Complete Pipeline Workflow
+## 🆘 Troubleshooting
 
-### Step 1: Download 10-Ks
+### "Command not found"
 
+**Problem**: `download-10k: command not found`
+
+**Solution**: Make sure your virtual environment is activated
 ```bash
-# Download all firm-years (or start with a test batch)
-python scripts/download_10k.py --batch-size 100
-
-# Check download results
-cat data/raw/10k/download_logs/summary_*.txt
-
-# Validate downloads
-python scripts/validate_data.py --stage downloads
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate     # Windows
 ```
 
-### Step 2: Process Files
+### "403 Forbidden" error
 
+**Problem**: SEC is blocking downloads
+
+**Solution**: Check that your email is in `config.yaml`
 ```bash
-# Parse and clean all downloaded files
-python scripts/process_batch.py
-
-# Check processing results
-cat data/processed/cleaned/processing_logs/processing_summary_*.txt
-
-# Validate processed files
-python scripts/validate_data.py --stage processed
+# Open config.yaml and verify this line:
+user_agent: "your.actual.email@university.edu"
 ```
 
-### Step 3: Validate Everything
+### Downloads are slow
 
-```bash
-# Full pipeline validation with report
-python scripts/validate_data.py --report
-
-# Review validation report
-cat validation_reports/validation_report_*.txt
-```
+**This is normal!** The SEC limits downloads to 10 per second.
+- 100 filings ≈ 10-15 seconds
+- 1,000 filings ≈ 2-3 minutes
+- 8,600 filings ≈ 15-30 minutes
 
 ---
 
-## Batch Processing Tips
+## 🔍 Main Documentation
 
-### Processing Large Datasets
+For complete details, see:
 
-For ~8,600 firm-years, process in manageable batches:
-
-```bash
-# Download in batches of 500
-for i in $(seq 0 500 8600); do
-  echo "Downloading batch starting at index $i"
-  python scripts/download_10k.py --start-index $i --batch-size 500
-  sleep 10  # Brief pause between batches
-done
-
-# Process in batches of 500
-python scripts/process_batch.py --batch-size 500
-```
-
-### Resume After Interruption
-
-All scripts support resuming:
-
-```bash
-# Downloads automatically skip existing files
-python scripts/download_10k.py --start-index 2000
-
-# Processing automatically skips existing files
-python scripts/process_batch.py --skip-existing
-```
-
-### Parallel Processing
-
-For multi-year processing (advanced):
-
-```bash
-# Download different years in parallel (separate terminals)
-python scripts/download_10k.py --batch-size 1000  # Terminal 1
-python scripts/download_10k.py --start-index 1000 --batch-size 1000  # Terminal 2
-```
+- **[Main README](../README.md)** - Project overview
+- **[Setup Guide](../docs/SETUP.md)** - Installation instructions
+- **[Usage Guide](../docs/USAGE.md)** - Detailed usage examples
 
 ---
 
-## Error Handling
-
-### Download Failures
-
-```bash
-# Check failed downloads
-cat data/raw/10k/download_logs/failed_*.csv
-
-# Retry failed downloads (they'll be automatically retried)
-python scripts/download_10k.py --no-skip-existing
-```
-
-### Processing Failures
-
-```bash
-# Check processing results
-cat data/processed/cleaned/processing_logs/processing_results_*.csv
-
-# Filter for failures
-grep "False" data/processed/cleaned/processing_logs/processing_results_*.csv
-```
-
-### Validation Issues
-
-```bash
-# Generate detailed validation report
-python scripts/validate_data.py --report --output-dir validation_reports
-
-# Review issues
-cat validation_reports/validation_report_*.txt
-```
-
----
-
-## Logging
-
-All scripts generate detailed logs:
-
-```bash
-# View latest download log
-tail -f logs/download_10k_*.log
-
-# View latest processing log
-tail -f logs/process_batch_*.log
-
-# View latest validation log
-tail -f logs/validate_data_*.log
-
-# Search for errors
-grep "ERROR" logs/*.log
-```
-
----
-
-## Configuration
-
-Scripts read settings from `config.yaml`:
-
-```yaml
-sec_edgar:
-  rate_limit: 10  # requests per second
-  user_agent: "your@email.com"
-  max_retries: 3
-
-paths:
-  raw_10k: "data/raw/10k"
-  cleaned_text: "data/processed/cleaned"
-
-batch_size: 100  # default batch size
-
-text_extraction:
-  sections:
-    - "item_1"
-    - "item_1a"
-    - "item_7"
-  min_text_length: 1000
-```
-
-Override config settings via command-line arguments.
-
----
-
-## Common Workflows
-
-### Quick Test (10 files)
-
-```bash
-python scripts/download_10k.py --batch-size 10
-python scripts/process_batch.py --batch-size 10
-python scripts/validate_data.py
-```
-
-### Standard Batch (100 files)
-
-```bash
-python scripts/download_10k.py --batch-size 100
-python scripts/process_batch.py
-python scripts/validate_data.py --report
-```
-
-### Full Dataset
-
-```bash
-# Download all
-python scripts/download_10k.py
-
-# Process all
-python scripts/process_batch.py
-
-# Validate all
-python scripts/validate_data.py --report
-```
-
----
-
-## Script Development
-
-### Adding New Scripts
-
-1. Create script in `scripts/` directory
-2. Add shebang: `#!/usr/bin/env python3`
-3. Add docstring with usage examples
-4. Import from `src/` modules
-5. Use `argparse` for CLI arguments
-6. Setup logging with `setup_logging()`
-7. Make script executable: `chmod +x scripts/your_script.py`
-
-### Template
-
-```python
-#!/usr/bin/env python3
-"""
-Script Description
-
-Usage:
-    python scripts/your_script.py [args]
-"""
-
-import sys
-from pathlib import Path
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from src.config import load_config
-from src.utils.logging_utils import setup_logging
-
-def main():
-    # Your script logic
-    pass
-
-if __name__ == "__main__":
-    sys.exit(main())
-```
-
----
-
-## Troubleshooting
-
-See individual script documentation and `docs/TROUBLESHOOTING.md` for detailed troubleshooting guides.
-
----
-
-**Last Updated**: 2026-01-21
+**Last Updated**: January 2026
 **Version**: 1.0
