@@ -25,30 +25,38 @@ class TenKParser:
     - Item 1: Business Description
     - Item 1A: Risk Factors
     - Item 7: Management's Discussion and Analysis (MD&A)
+
+    Handles SEC EDGAR full-submission format which contains multiple
+    embedded documents with SEC headers.
     """
 
     # Section patterns for different 10-K formats
     SECTION_PATTERNS = {
         'item_1': [
-            r'(?:item\s*1[\.\:\s]+|item\s*1\s*\-\s*)(?:business|description\s+of\s+business)',
-            r'>item\s*1[\.\:\s]',
-            r'item\s*1\s*business'
+            r'(?:item\s*1[\.\:\s]+|item\s*1\s*[\-\—]\s*)(?:business|description\s+of\s+business)',
+            r'>\s*item\s*1[\.\:\s]',
+            r'item\s*1[\.\s]+business',
+            r'item\s+1\s*\n+\s*business',
+            r'part\s+i\s*\n+\s*item\s*1'
         ],
         'item_1a': [
-            r'(?:item\s*1a[\.\:\s]+|item\s*1a\s*\-\s*)(?:risk\s*factors?)',
-            r'>item\s*1a[\.\:\s]',
-            r'item\s*1a\s*risk'
+            r'(?:item\s*1a[\.\:\s]+|item\s*1a\s*[\-\—]\s*)(?:risk\s*factors?)',
+            r'>\s*item\s*1a[\.\:\s]',
+            r'item\s*1a[\.\s]+risk',
+            r'item\s+1a\s*\n+\s*risk'
         ],
         'item_7': [
-            r'(?:item\s*7[\.\:\s]+|item\s*7\s*\-\s*)(?:management|md&a|discussion)',
-            r'>item\s*7[\.\:\s]',
-            r'item\s*7\s*management'
+            r'(?:item\s*7[\.\:\s]+|item\s*7\s*[\-\—]\s*)(?:management|md&a|discussion)',
+            r'>\s*item\s*7[\.\:\s]',
+            r'item\s*7[\.\s]+management',
+            r'item\s+7\s*\n+\s*management',
+            r"item\s*7[\.\s]+management'?s?\s+discussion"
         ]
     }
 
     # Section end patterns (to know where each section stops)
     SECTION_END_PATTERNS = {
-        'item_1': [r'item\s*1a', r'item\s*2'],
+        'item_1': [r'item\s*1a', r'item\s*1b', r'item\s*2'],
         'item_1a': [r'item\s*1b', r'item\s*2'],
         'item_7': [r'item\s*7a', r'item\s*8']
     }
@@ -62,9 +70,69 @@ class TenKParser:
         """
         self.min_section_length = min_section_length
 
+    def _extract_10k_document(self, content: str) -> str:
+        """
+        Extract the 10-K document from SEC EDGAR full-submission format.
+
+        SEC EDGAR full-submission.txt files contain multiple <DOCUMENT> blocks.
+        This method finds and extracts the primary 10-K document.
+
+        Args:
+            content: Raw file content
+
+        Returns:
+            Extracted 10-K document content (or original if not in submission format)
+        """
+        # Check if this is a full-submission format (has SEC header)
+        if '<SEC-DOCUMENT>' not in content and '<DOCUMENT>' not in content:
+            # Not a full-submission format, return as-is
+            return content
+
+        # Find all document blocks
+        doc_pattern = r'<DOCUMENT>(.*?)</DOCUMENT>'
+        documents = re.findall(doc_pattern, content, re.DOTALL | re.IGNORECASE)
+
+        if not documents:
+            # Try alternative pattern without closing tag
+            doc_start_pattern = r'<DOCUMENT>'
+            doc_starts = [m.end() for m in re.finditer(doc_start_pattern, content, re.IGNORECASE)]
+
+            if doc_starts:
+                # Take content from first document start
+                return content[doc_starts[0]:]
+            return content
+
+        # Look for the 10-K document (TYPE 10-K)
+        for doc in documents:
+            # Check document type
+            type_match = re.search(r'<TYPE>\s*(10-K)\s*', doc, re.IGNORECASE)
+            if type_match:
+                # Found the 10-K, extract the text portion
+                # Remove the header section and get the actual content
+                text_match = re.search(r'<TEXT>(.*?)</TEXT>', doc, re.DOTALL | re.IGNORECASE)
+                if text_match:
+                    return text_match.group(1)
+                # If no <TEXT> tag, return the document content after the header
+                header_end = re.search(r'</SEC-HEADER>|<TEXT>', doc, re.IGNORECASE)
+                if header_end:
+                    return doc[header_end.end():]
+                return doc
+
+        # If no 10-K type found, try to find the largest document (likely the 10-K)
+        if documents:
+            largest_doc = max(documents, key=len)
+            text_match = re.search(r'<TEXT>(.*?)</TEXT>', largest_doc, re.DOTALL | re.IGNORECASE)
+            if text_match:
+                return text_match.group(1)
+            return largest_doc
+
+        return content
+
     def parse_file(self, filepath: str) -> Dict[str, Optional[str]]:
         """
         Parse a 10-K HTML file and extract all sections.
+
+        Handles both plain HTML files and SEC EDGAR full-submission format.
 
         Args:
             filepath: Path to 10-K HTML file
@@ -80,14 +148,22 @@ class TenKParser:
             return {'item_1': None, 'item_1a': None, 'item_7': None}
 
         try:
-            # Read and parse HTML
+            # Read file content
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                html_content = f.read()
+                raw_content = f.read()
 
-            soup = BeautifulSoup(html_content, 'lxml')
+            # Extract 10-K document from full-submission format if needed
+            doc_content = self._extract_10k_document(raw_content)
+
+            # Parse HTML
+            soup = BeautifulSoup(doc_content, 'lxml')
 
             # Get text content
             text = soup.get_text(separator='\n')
+
+            # Clean up excessive whitespace while preserving structure
+            text = re.sub(r'\n{4,}', '\n\n\n', text)
+            text = re.sub(r' {3,}', '  ', text)
 
             # Extract each section
             results = {}
@@ -118,35 +194,57 @@ class TenKParser:
         """
         text_lower = text.lower()
 
-        # Find section start
-        start_pos = None
+        # Find all potential section starts (skip table of contents entries)
+        candidates = []
         for pattern in self.SECTION_PATTERNS[section_name]:
-            match = re.search(pattern, text_lower, re.IGNORECASE)
-            if match:
-                start_pos = match.end()
-                break
+            for match in re.finditer(pattern, text_lower, re.IGNORECASE):
+                candidates.append(match)
 
-        if start_pos is None:
+        if not candidates:
             logger.debug(f"Could not find start of {section_name}")
             return None
 
-        # Find section end
-        end_pos = len(text)
-        for pattern in self.SECTION_END_PATTERNS[section_name]:
-            match = re.search(pattern, text_lower[start_pos:], re.IGNORECASE)
-            if match:
-                end_pos = start_pos + match.start()
-                break
+        # Try each candidate, starting from the last one (more likely to be the actual section)
+        # Table of contents entries appear early, actual sections appear later
+        candidates.sort(key=lambda m: m.start(), reverse=True)
 
-        # Extract section text
-        section_text = text[start_pos:end_pos]
+        for match in candidates:
+            start_pos = match.end()
 
-        # Validate minimum length
-        if len(section_text) < self.min_section_length:
-            logger.debug(f"{section_name} too short: {len(section_text)} characters")
-            return None
+            # Find section end
+            end_pos = len(text)
+            for pattern in self.SECTION_END_PATTERNS[section_name]:
+                end_match = re.search(pattern, text_lower[start_pos:], re.IGNORECASE)
+                if end_match:
+                    # Make sure the end pattern is not too close (table of contents)
+                    if end_match.start() > 500:  # At least 500 chars between start and end
+                        end_pos = start_pos + end_match.start()
+                        break
 
-        return section_text.strip()
+            # Extract section text
+            section_text = text[start_pos:end_pos]
+
+            # Validate minimum length - if this candidate works, use it
+            if len(section_text) >= self.min_section_length:
+                return section_text.strip()
+
+        # If no candidate produced valid section, try the first match with relaxed end detection
+        if candidates:
+            match = min(candidates, key=lambda m: m.start())
+            start_pos = match.end()
+
+            # Look for ANY next item marker
+            end_pos = len(text)
+            next_item = re.search(r'\n\s*item\s*\d', text_lower[start_pos:], re.IGNORECASE)
+            if next_item and next_item.start() > 500:
+                end_pos = start_pos + next_item.start()
+
+            section_text = text[start_pos:end_pos]
+            if len(section_text) >= self.min_section_length:
+                return section_text.strip()
+
+        logger.debug(f"{section_name} extraction failed - no valid section found")
+        return None
 
     def parse_batch(self, filepaths: list, output_dir: str = None) -> pd.DataFrame:
         """
