@@ -199,23 +199,56 @@ class SECDownloader:
         try:
             # Use sec-edgar-downloader library for robust downloading
             from sec_edgar_downloader import Downloader
+            import shutil
+            import glob
 
-            # Initialize downloader with our user agent
-            dl = Downloader(self.output_dir.parent.parent, self.user_agent.split()[-1])
+            # Initialize downloader - saves to sec-edgar-filings/ in project root
+            download_root = self.output_dir.parent.parent
+            dl = Downloader(download_root, self.user_agent.split()[-1])
 
             # Download the 10-K filing
-            # The library handles rate limiting and retries
             self._enforce_rate_limit()
 
             num_downloaded = dl.get("10-K", cik_formatted, after=f"{year}-01-01", before=f"{year}-12-31")
 
             if num_downloaded > 0:
-                logger.info(f"Successfully downloaded 10-K for CIK {cik_formatted}, year {year}")
+                # Find the downloaded file in sec-edgar-filings structure
+                # Structure: sec-edgar-filings/{CIK}/10-K/{accession}/full-submission.txt
+                sec_edgar_dir = download_root / "sec-edgar-filings" / cik_formatted / "10-K"
 
-                # The sec-edgar-downloader saves files in a specific directory structure
-                # We need to move/rename them to our desired structure
-                # For now, return success
-                return True, str(filepath)
+                if sec_edgar_dir.exists():
+                    # Find the most recent filing for the target year
+                    downloaded_file = None
+                    for accession_dir in sorted(sec_edgar_dir.iterdir(), reverse=True):
+                        if accession_dir.is_dir():
+                            # Extract year from accession number (format: 0000850209-17-000025)
+                            accession_name = accession_dir.name
+                            parts = accession_name.split('-')
+                            if len(parts) >= 2:
+                                year_short = parts[1]
+                                # Handle both 2-digit (17) and 4-digit years
+                                if len(year_short) == 2:
+                                    accession_year = int("20" + year_short) if int(year_short) < 50 else int("19" + year_short)
+                                else:
+                                    accession_year = int(year_short)
+
+                                if accession_year == year:
+                                    submission_file = accession_dir / "full-submission.txt"
+                                    if submission_file.exists():
+                                        downloaded_file = submission_file
+                                        break
+
+                    if downloaded_file:
+                        # Copy to our standardized location
+                        shutil.copy2(downloaded_file, filepath)
+                        logger.info(f"Successfully downloaded and moved 10-K for CIK {cik_formatted}, year {year}")
+                        return True, str(filepath)
+                    else:
+                        logger.warning(f"Downloaded but could not find matching file for year {year}")
+                        return False, None
+                else:
+                    logger.warning(f"sec-edgar-filings directory not found for CIK {cik_formatted}")
+                    return False, None
             else:
                 logger.warning(f"No 10-K found for CIK {cik_formatted}, year {year}")
                 return False, None
