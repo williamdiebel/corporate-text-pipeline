@@ -55,10 +55,22 @@ class TenKParser:
     }
 
     # Section end patterns (to know where each section stops)
+    # These patterns are designed to match actual section HEADERS, not inline references
+    # Section headers typically start on a new line and have a period/colon after the item number
     SECTION_END_PATTERNS = {
-        'item_1': [r'item\s*1a', r'item\s*1b', r'item\s*2'],
-        'item_1a': [r'item\s*1b', r'item\s*2'],
-        'item_7': [r'item\s*7a', r'item\s*8']
+        'item_1': [
+            r'\n\s*item\s*1a[\.\:\s]+',      # Item 1A header on new line
+            r'\n\s*item\s*1b[\.\:\s]+',      # Item 1B header on new line
+            r'\n\s*item\s*2[\.\:\s]+'        # Item 2 header on new line
+        ],
+        'item_1a': [
+            r'\n\s*item\s*1b[\.\:\s]+',      # Item 1B header on new line
+            r'\n\s*item\s*2[\.\:\s]+'        # Item 2 header on new line
+        ],
+        'item_7': [
+            r'\n\s*item\s*7a[\.\:\s]+',      # Item 7A header on new line
+            r'\n\s*item\s*8[\.\:\s]+'        # Item 8 header on new line
+        ]
     }
 
     def __init__(self, min_section_length: int = 1000):
