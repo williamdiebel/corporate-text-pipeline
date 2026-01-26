@@ -223,6 +223,13 @@ class TenKParser:
         for match in candidates:
             start_pos = match.end()
 
+            # Skip to end of current line to avoid partial header text
+            # Find the next newline after the match
+            next_newline = text.find('\n', start_pos)
+            if next_newline != -1 and next_newline - start_pos < 200:
+                # Skip the rest of the header line
+                start_pos = next_newline + 1
+
             # Find section end
             end_pos = len(text)
             for pattern in self.SECTION_END_PATTERNS[section_name]:
@@ -244,6 +251,11 @@ class TenKParser:
         if candidates:
             match = min(candidates, key=lambda m: m.start())
             start_pos = match.end()
+
+            # Skip to end of current line to avoid partial header text
+            next_newline = text.find('\n', start_pos)
+            if next_newline != -1 and next_newline - start_pos < 200:
+                start_pos = next_newline + 1
 
             # Look for ANY next item marker
             end_pos = len(text)
