@@ -145,34 +145,23 @@ def get_processed_files(output_dir: Path, sections: list) -> set:
 
     Args:
         output_dir: Output directory
-        sections: List of sections being extracted
+        sections: List of sections being extracted (not used for aggregated files)
 
     Returns:
-        Set of base filenames that have all sections
+        Set of base filenames that have been processed
     """
     if not output_dir.exists():
         return set()
 
-    processed = {}
+    # Look for aggregated files: {CIK}_{YEAR}_10K.txt
+    processed = set()
+    for txt_file in output_dir.glob('*_10K.txt'):
+        # Skip old-style section files (contain _item_)
+        if '_item_' in txt_file.stem:
+            continue
+        processed.add(txt_file.stem)
 
-    for txt_file in output_dir.glob('*_item_*.txt'):
-        # Extract base name (e.g., 0000001750_2020_10K)
-        base_name = '_'.join(txt_file.stem.split('_')[:-2])
-
-        if base_name not in processed:
-            processed[base_name] = set()
-
-        # Extract section name
-        section = '_'.join(txt_file.stem.split('_')[-2:])
-        processed[base_name].add(section)
-
-    # Return only files that have all required sections
-    complete = set()
-    for base_name, found_sections in processed.items():
-        if all(section in found_sections for section in sections):
-            complete.add(base_name)
-
-    return complete
+    return processed
 
 
 def process_file(
@@ -184,7 +173,7 @@ def process_file(
     clean_text: bool = True
 ) -> dict:
     """
-    Process a single 10-K file.
+    Process a single 10-K file into an aggregated output.
 
     Args:
         filepath: Path to 10-K file
@@ -203,14 +192,24 @@ def process_file(
         'base_name': base_name,
         'success': False,
         'sections_extracted': 0,
-        'sections_cleaned': 0
+        'sections_cleaned': 0,
+        'total_length': 0
+    }
+
+    # Section display names for output
+    section_titles = {
+        'item_1': 'ITEM 1: BUSINESS DESCRIPTION',
+        'item_1a': 'ITEM 1A: RISK FACTORS',
+        'item_7': 'ITEM 7: MANAGEMENT DISCUSSION AND ANALYSIS'
     }
 
     try:
         # Parse file
         extracted = parser.parse_file(filepath)
 
-        # Save each section
+        # Build aggregated content
+        aggregated_parts = []
+
         for section_name in sections:
             text = extracted.get(section_name)
 
@@ -222,14 +221,26 @@ def process_file(
                     text = cleaner.clean(text)
                     results['sections_cleaned'] += 1
 
-                # Save to file
-                output_file = output_dir / f"{base_name}_{section_name}.txt"
-                with open(output_file, 'w', encoding='utf-8') as f:
-                    f.write(text)
+                # Get display title or use section name
+                title = section_titles.get(section_name, section_name.upper())
+
+                # Add section with clear header
+                section_content = f"{'=' * 80}\n{title}\n{'=' * 80}\n\n{text}\n\n"
+                aggregated_parts.append(section_content)
 
                 results[f'{section_name}_length'] = len(text)
 
-        results['success'] = results['sections_extracted'] > 0
+        if aggregated_parts:
+            # Combine all sections into one file
+            aggregated_content = '\n'.join(aggregated_parts)
+            results['total_length'] = len(aggregated_content)
+
+            # Save aggregated file: {CIK}_{YEAR}_10K.txt
+            output_file = output_dir / f"{base_name}.txt"
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(aggregated_content)
+
+            results['success'] = True
 
     except Exception as e:
         logging.error(f"Error processing {filepath.name}: {e}", exc_info=True)

@@ -50,13 +50,25 @@ text_extraction:
   # Minimum text length to consider valid (filters out extraction errors)
   min_text_length: 1000  # characters
 
-# LLM API SETTINGS (will configure when you have API access)
+# LLM API SETTINGS
+# Primary: OpenAI GPT 5.2 (approved for use)
+# Secondary: Claude API (pending approval, for replication)
 llm:
-  provider: "claude"  # Options: "claude", "openai", "local"
-  model: "claude-sonnet-4-20250514"
-  api_key_env: "ANTHROPIC_API_KEY"
-  max_tokens: 4096
-  temperature: 0.0  # deterministic for research reproducibility
+  # Primary provider for scoring
+  primary:
+    provider: "openai"
+    model: "gpt-5.2"
+    api_key_env: "OPENAI_API_KEY"
+    max_tokens: 4096
+    temperature: 0.0  # deterministic for research reproducibility
+
+  # Secondary provider for replication (if approved)
+  secondary:
+    provider: "claude"
+    model: "claude-sonnet-4-20250514"
+    api_key_env: "ANTHROPIC_API_KEY"
+    max_tokens: 4096
+    temperature: 0.0
 
 # SUPPLY CHAIN TRANSPARENCY SCORING DIMENSIONS
 # Based on Bateman & Bonanni (2019) and Sodhi & Tang (2019)
