@@ -89,7 +89,7 @@ Issues = "https://github.com/williamdiebel/corporate-text-pipeline/issues"
 
 # Tell setuptools where to find our code
 [tool.setuptools]
-packages = ["src", "src.downloaders", "src.processors", "src.utils"]
+packages = ["src", "src.downloaders", "src.processors", "src.utils", "scripts"]
 
 # Pytest configuration (testing tool)
 [tool.pytest.ini_options]
