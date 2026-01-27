@@ -397,39 +397,84 @@ def download_10k(
 
 ### The LLM Scoring Module (Stage 4)
 
-This is the crown jewel—using Claude to score transparency. The design:
+This is the crown jewel—using **OpenAI GPT 5.2** to score transparency.
+
+**API Decision (January 2026):**
+- **Primary:** OpenAI GPT 5.2 (approved for use)
+- **Secondary:** Claude API (pending approval, for replication study)
+
+The design:
 
 ```python
 # Pseudocode for scoring
-for firm_year in firm_years:
-    # Load all sections for this firm-year
-    text = load_aggregated_text(firm_year)
+from openai import OpenAI
+client = OpenAI()
 
-    # Send to Claude with scoring prompt
-    response = claude.analyze(
-        prompt=TRANSPARENCY_SCORING_PROMPT,
-        text=text
+for firm_year in firm_years:
+    # Load aggregated text (all sections in one file)
+    text = load_file(f"{cik}_{year}_10K.txt")
+
+    # Send to GPT 5.2 with scoring prompt
+    response = client.chat.completions.create(
+        model="gpt-5.2",
+        messages=[
+            {"role": "system", "content": TRANSPARENCY_SCORING_PROMPT},
+            {"role": "user", "content": text}
+        ],
+        temperature=0.0  # Deterministic for reproducibility
     )
 
     # Parse scores (1-10 for each dimension)
     scores = parse_response(response)
 
-    # Save to database/CSV
+    # Save to CSV
     save_scores(firm_year, scores)
 ```
 
 **Key considerations:**
-- **Cost:** Claude API has costs per token. 8,672 firm-years × ~50K tokens each = significant cost
-- **Rate limits:** API has request limits; need throttling
+- **Cost:** OpenAI API has costs per token. 8,672 firm-years × ~50K tokens each = significant cost (estimate and budget!)
+- **Rate limits:** API has request limits; need throttling (built into our pipeline)
 - **Reproducibility:** Use `temperature=0` for deterministic results
 - **Validation:** Score a subset manually to verify AI accuracy
+- **Replication:** If Claude is approved, run secondary scoring for robustness check
+
+### Output File Format (Aggregated)
+
+The `process-batch` command now outputs **one file per firm-year** with all sections combined:
+
+```
+================================================================================
+ITEM 1: BUSINESS DESCRIPTION
+================================================================================
+
+[Business description text here...]
+
+================================================================================
+ITEM 1A: RISK FACTORS
+================================================================================
+
+[Risk factors text here...]
+
+================================================================================
+ITEM 7: MANAGEMENT DISCUSSION AND ANALYSIS
+================================================================================
+
+[MD&A text here...]
+```
+
+**Why aggregated?**
+- Reduces file count from 26,000 to 8,672
+- No need to recombine for LLM scoring
+- Cleaner pipeline: one input file = one observation
+- Easier to inspect and debug
 
 ### Recommended Improvements
 
-1. **Aggregate sections** into single files (reduces complexity)
+1. ~~Aggregate sections into single files~~ ✅ **DONE**
 2. **Add unit tests** (currently none—risky for research code)
 3. **Dockerize** (ensures identical environment across machines)
 4. **Add data validation** between stages (catch errors early)
+5. **Build the scoring module** (next major milestone)
 
 ---
 
@@ -446,5 +491,5 @@ Now go score some supply chains.
 ---
 
 *Last updated: January 27, 2026*
-*Pipeline version: 0.1.0*
+*Pipeline version: 0.2.0* (aggregated output, OpenAI integration)
 *Written by Claude, edited by Will*
