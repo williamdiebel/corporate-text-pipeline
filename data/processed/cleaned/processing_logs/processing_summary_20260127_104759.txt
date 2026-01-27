@@ -1,0 +1,8 @@
+10-K Processing Summary
+==================================================
+Total files: 10
+Successful: 10
+Failed: 0
+Success rate: 100.00%
+
+Average sections per file: 3.00

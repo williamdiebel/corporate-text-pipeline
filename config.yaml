@@ -5,7 +5,7 @@ description: "Automated pipeline for downloading and analyzing 10-K filings for 
 # FIRM-YEAR SPECIFICATIONS
 # Your input CSV should have columns: CIK, Year, EventID, TreatmentStatus
 # This allows you to specify exact firm-year combinations around event windows
-firm_list_file: "data/firm_lists/target_firm_years.csv"
+firm_list_file: "data/firm_lists/pilot_fti_firms.csv"
 
 # DOWNLOAD SETTINGS
 sec_edgar:
