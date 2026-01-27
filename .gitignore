@@ -206,6 +206,19 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# =============================================================================
+# DATA FILES - Too large for git, stored in shared Dropbox
+# =============================================================================
+# Raw downloaded 10-K filings (4-17 GB at full scale)
+data/raw/
+
+# Processed/cleaned text files (500 MB - 2.5 GB at full scale)
+data/processed/
+
+# Keep firm lists and documentation tracked
+!data/firm_lists/
+!data/README.md
+
 # macOS
 .DS_Store
 .AppleDouble

@@ -4,9 +4,41 @@
 
 ---
 
-## 🎯 For Students & Research Assistants
+## Collaborative Setup: Shared Dropbox Folder
 
-**You'll check this folder to see what's been downloaded and processed, but you won't edit files here directly.**
+For team collaboration, data files are stored in a **shared Dropbox folder** rather than locally. This allows all collaborators to access the same downloaded and processed files.
+
+### Setting Up Your Data Path
+
+1. **Get access** to the shared Dropbox folder from Will
+2. **Configure your path** in `config.yaml`:
+
+```yaml
+# Set to your Dropbox path
+data_root: "/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Mac
+# data_root: "C:/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Windows
+```
+
+Or set the `DATA_ROOT` environment variable:
+```bash
+export DATA_ROOT="/Users/YourName/Dropbox/corporate-text-pipeline-data"
+```
+
+3. **Verify it's working**:
+```bash
+# The scripts will now read/write to Dropbox
+download-10k --batch-size 1  # Downloads to Dropbox folder
+```
+
+### If data_root is NOT set
+
+When `data_root` is null/empty in config.yaml, scripts will use the local `data/` directory (this folder). This is fine for testing but won't sync with collaborators.
+
+---
+
+## For Students & Research Assistants
+
+**You'll check the data folder (local or Dropbox) to see what's been downloaded and processed, but you won't edit files here directly.**
 
 ---
 

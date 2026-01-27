@@ -156,11 +156,89 @@ download-10k --batch-size 10
 ls data/raw/10k/
 ```
 
-**Congratulations!** 🎉 You've set up the pipeline!
+**Congratulations!** You've set up the pipeline!
 
 ---
 
-## 📁 Project Structure
+## Collaborative Data Management (Dropbox)
+
+For team collaboration, we store data files in a **shared Dropbox folder** rather than in git. This keeps the repository lightweight while allowing everyone to access the same data.
+
+### Why Dropbox?
+
+- **Git can't handle large files**: At full scale, we'll have 8,600+ 10-K filings (4-17 GB)
+- **Automatic sync**: Changes sync to all collaborators automatically
+- **No merge conflicts**: Data files don't conflict like code
+
+### Dropbox Folder Structure
+
+Create a shared Dropbox folder with this structure:
+
+```
+Dropbox/
+└── corporate-text-pipeline-data/
+    ├── raw/
+    │   └── 10k/                    # Downloaded HTML files go here
+    ├── processed/
+    │   ├── cleaned/                # Extracted/cleaned text
+    │   └── scores/                 # Future LLM scoring output
+    └── logs/                       # Processing logs
+```
+
+### Configure Your Data Path
+
+**Option 1: Edit config.yaml** (recommended)
+
+Open `config.yaml` and set your Dropbox path:
+
+```yaml
+# Set to your shared Dropbox folder path
+data_root: "/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Mac
+# data_root: "C:/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Windows
+```
+
+**Option 2: Environment Variable**
+
+Set the `DATA_ROOT` environment variable (overrides config.yaml):
+
+```bash
+# Add to your .bashrc or .zshrc
+export DATA_ROOT="/Users/YourName/Dropbox/corporate-text-pipeline-data"
+```
+
+### Coordinating with Collaborators
+
+To avoid duplicate work when multiple people are downloading/processing:
+
+1. **Split the firm list into batches** - Each person works on a subset of CIKs
+2. **Track progress** - Keep a shared spreadsheet or `progress.csv` in Dropbox:
+
+| Batch | CIK Range | Assigned To | Download Status | Processing Status |
+|-------|-----------|-------------|-----------------|-------------------|
+| 1 | 0-2900 | Alice | Complete | Complete |
+| 2 | 2901-5800 | Bob | In Progress | Not Started |
+| 3 | 5801-8672 | Carol | Not Started | Not Started |
+
+3. **Use start-index and batch-size** to work on your assigned range:
+
+```bash
+# Alice downloads rows 0-2900
+download-10k --start-index 0 --batch-size 2900
+
+# Bob downloads rows 2901-5800
+download-10k --start-index 2901 --batch-size 2900
+```
+
+### What's Tracked Where?
+
+| Location | What's Stored |
+|----------|---------------|
+| **Git** | Code, scripts, config, firm lists, documentation |
+| **Dropbox** | Raw 10-K files, processed text, logs, LLM scores |
+
+---
+
+## Project Structure
 
 ### Overview
 

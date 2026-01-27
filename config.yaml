@@ -2,6 +2,18 @@
 project_name: "Corporate Text Pipeline - Supply Chain Transparency"
 description: "Automated pipeline for downloading and analyzing 10-K filings for supply chain transparency measures"
 
+# =============================================================================
+# DATA ROOT - For collaborative work with shared Dropbox folder
+# =============================================================================
+# Set this to your shared Dropbox folder path. Leave empty/null to use local data/ directory.
+# Examples:
+#   Windows: "C:/Users/YourName/Dropbox/corporate-text-pipeline-data"
+#   Mac:     "/Users/YourName/Dropbox/corporate-text-pipeline-data"
+#   Linux:   "/home/YourName/Dropbox/corporate-text-pipeline-data"
+#
+# You can also override this via environment variable: DATA_ROOT
+data_root: null  # Set to your Dropbox path, or leave null for local data/
+
 # FIRM-YEAR SPECIFICATIONS
 # Your input CSV should have columns: CIK, Year, EventID, TreatmentStatus
 # This allows you to specify exact firm-year combinations around event windows

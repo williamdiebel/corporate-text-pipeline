@@ -39,6 +39,23 @@ def load_config(config_path=None):
     # Add project root to config for easy path construction
     config['project_root'] = str(PROJECT_ROOT)
 
+    # Resolve data_root - priority: environment variable > config file > default
+    data_root = os.getenv('DATA_ROOT') or config.get('data_root')
+    if data_root:
+        data_root = Path(data_root).expanduser().resolve()
+    else:
+        data_root = PROJECT_ROOT / 'data'
+
+    config['data_root'] = str(data_root)
+
+    # Update paths to use data_root
+    if 'paths' in config:
+        for key, value in config['paths'].items():
+            if value.startswith('data/'):
+                # Replace 'data/' prefix with data_root
+                relative_path = value[5:]  # Remove 'data/' prefix
+                config['paths'][key] = str(data_root / relative_path)
+
     return config
 
 
