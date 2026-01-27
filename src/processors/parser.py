@@ -33,22 +33,22 @@ class TenKParser:
     # Section patterns for different 10-K formats
     SECTION_PATTERNS = {
         'item_1': [
+            r'item\s*1\.?\s+business',                    # Item 1.    Business
             r'(?:item\s*1[\.\:\s]+|item\s*1\s*[\-\—]\s*)(?:business|description\s+of\s+business)',
             r'>\s*item\s*1[\.\:\s]',
-            r'item\s*1[\.\s]+business',
             r'item\s+1\s*\n+\s*business',
             r'part\s+i\s*\n+\s*item\s*1'
         ],
         'item_1a': [
+            r'item\s*1a\.?\s+risk\s*factors?',           # Item 1A.    Risk Factors
             r'(?:item\s*1a[\.\:\s]+|item\s*1a\s*[\-\—]\s*)(?:risk\s*factors?)',
             r'>\s*item\s*1a[\.\:\s]',
-            r'item\s*1a[\.\s]+risk',
             r'item\s+1a\s*\n+\s*risk'
         ],
         'item_7': [
+            r'item\s*7\.?\s+management',                 # Item 7.    Management's...
             r'(?:item\s*7[\.\:\s]+|item\s*7\s*[\-\—]\s*)(?:management|md&a|discussion)',
             r'>\s*item\s*7[\.\:\s]',
-            r'item\s*7[\.\s]+management',
             r'item\s+7\s*\n+\s*management',
             r"item\s*7[\.\s]+management'?s?\s+discussion"
         ]
