@@ -202,7 +202,8 @@ class SECDownloader:
             import shutil
             import glob
 
-            # Initialize downloader - saves to sec-edgar-filings/ in project root
+            # Initialize downloader - saves to sec-edgar-filings/ in specified root
+            # Use the data root (parent of raw/) as the download root
             download_root = self.output_dir.parent.parent
             dl = Downloader(download_root, self.user_agent.split()[-1])
 
@@ -214,9 +215,17 @@ class SECDownloader:
             if num_downloaded > 0:
                 # Find the downloaded file in sec-edgar-filings structure
                 # Structure: sec-edgar-filings/{CIK}/10-K/{accession}/full-submission.txt
-                sec_edgar_dir = download_root / "sec-edgar-filings" / cik_formatted / "10-K"
+                # Check both download_root and current working directory (library behavior varies)
+                possible_roots = [download_root, Path.cwd()]
+                sec_edgar_dir = None
 
-                if sec_edgar_dir.exists():
+                for root in possible_roots:
+                    candidate = root / "sec-edgar-filings" / cik_formatted / "10-K"
+                    if candidate.exists():
+                        sec_edgar_dir = candidate
+                        break
+
+                if sec_edgar_dir and sec_edgar_dir.exists():
                     # Find the most recent filing for the target year
                     downloaded_file = None
                     for accession_dir in sorted(sec_edgar_dir.iterdir(), reverse=True):
@@ -247,7 +256,9 @@ class SECDownloader:
                         logger.warning(f"Downloaded but could not find matching file for year {year}")
                         return False, None
                 else:
-                    logger.warning(f"sec-edgar-filings directory not found for CIK {cik_formatted}")
+                    # Log where we looked for debugging
+                    searched_paths = [str(root / "sec-edgar-filings" / cik_formatted / "10-K") for root in possible_roots]
+                    logger.warning(f"sec-edgar-filings directory not found for CIK {cik_formatted}. Searched: {searched_paths}")
                     return False, None
             else:
                 logger.warning(f"No 10-K found for CIK {cik_formatted}, year {year}")
