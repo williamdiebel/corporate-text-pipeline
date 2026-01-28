@@ -214,6 +214,9 @@ config.yaml
 # =============================================================================
 # DATA FILES - Too large for git, stored in shared Dropbox
 # =============================================================================
+# sec-edgar-downloader library intermediate files (duplicates of data/raw/)
+sec-edgar-filings/
+
 # Raw downloaded 10-K filings (4-17 GB at full scale)
 data/raw/
 
