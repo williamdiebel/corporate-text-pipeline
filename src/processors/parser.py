@@ -305,13 +305,22 @@ class TenKParser:
 
             # Find section end
             end_pos = len(text)
+            is_toc_entry = False
             for pattern in self.SECTION_END_PATTERNS[section_name]:
                 end_match = re.search(pattern, text_lower[start_pos:], re.IGNORECASE)
                 if end_match:
-                    # Make sure the end pattern is not too close (table of contents)
                     if end_match.start() > 500:  # At least 500 chars between start and end
                         end_pos = start_pos + end_match.start()
                         break
+                    else:
+                        # End pattern found but too close - this is likely a TOC entry
+                        is_toc_entry = True
+                        break
+
+            # Skip TOC entries - try next candidate instead
+            if is_toc_entry:
+                logger.debug(f"Skipping TOC entry at position {actual_pos}")
+                continue
 
             # Extract section text
             section_text = text[start_pos:end_pos]
@@ -320,9 +329,9 @@ class TenKParser:
             if len(section_text) >= self.min_section_length:
                 return section_text.strip()
 
-        # If no candidate produced valid section, try the first match with relaxed end detection
-        if candidates:
-            actual_pos, match_len = candidates[0]
+        # If no candidate produced valid section, try with relaxed end detection
+        # But still skip TOC entries (where end markers are too close)
+        for actual_pos, match_len in candidates:
             start_pos = actual_pos + match_len
 
             # Skip to end of current line to avoid partial header text
@@ -331,8 +340,12 @@ class TenKParser:
                 start_pos = next_newline + 1
 
             # Look for ANY next item marker
-            end_pos = len(text)
             next_item = re.search(r'\n\s*item\s*\d', text_lower[start_pos:], re.IGNORECASE)
+            if next_item and next_item.start() < 500:
+                # This looks like a TOC entry, skip it
+                continue
+
+            end_pos = len(text)
             if next_item and next_item.start() > 500:
                 end_pos = start_pos + next_item.start()
 
