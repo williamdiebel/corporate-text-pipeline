@@ -90,7 +90,7 @@ class TestSECDownloaderIntegration:
         )
 
         # Download Apple's 2020 10-K (known to exist)
-        success, filepath = downloader.download_10k(
+        success, filepath, was_skipped = downloader.download_10k(
             cik="320193",  # Apple Inc.
             year=2020
         )

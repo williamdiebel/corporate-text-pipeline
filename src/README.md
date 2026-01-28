@@ -48,7 +48,7 @@ from src.processors import TenKParser, TextCleaner
 
 # Download a specific filing
 downloader = SECDownloader(user_agent="your@email.com", output_dir="data/raw/10k")
-success, filepath = downloader.download_10k(cik="1750", year=2020)
+success, filepath, was_skipped = downloader.download_10k(cik="1750", year=2020)
 
 # Parse it
 parser = TenKParser()
@@ -192,7 +192,7 @@ downloader = SECDownloader(
 )
 
 # Download a 10-K
-success, filepath = downloader.download_10k(cik="1750", year=2020)
+success, filepath, was_skipped = downloader.download_10k(cik="1750", year=2020)
 
 if success:
     # Parse the filing

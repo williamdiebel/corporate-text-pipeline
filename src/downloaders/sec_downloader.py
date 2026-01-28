@@ -173,7 +173,7 @@ class SECDownloader:
         cik: str,
         year: int,
         skip_if_exists: bool = True
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> Tuple[bool, Optional[str], bool]:
         """
         Download a single 10-K filing.
 
@@ -183,7 +183,7 @@ class SECDownloader:
             skip_if_exists: Skip download if file already exists
 
         Returns:
-            Tuple of (success: bool, file_path: Optional[str])
+            Tuple of (success: bool, file_path: Optional[str], was_skipped: bool)
         """
         cik_formatted = self._format_cik(cik)
 
@@ -194,7 +194,7 @@ class SECDownloader:
         # Check if file already exists
         if skip_if_exists and filepath.exists():
             logger.info(f"File already exists, skipping: {filename}")
-            return True, str(filepath)
+            return True, str(filepath), True
 
         try:
             # Use sec-edgar-downloader library for robust downloading
@@ -251,22 +251,22 @@ class SECDownloader:
                         # Copy to our standardized location
                         shutil.copy2(downloaded_file, filepath)
                         logger.info(f"Successfully downloaded and moved 10-K for CIK {cik_formatted}, year {year}")
-                        return True, str(filepath)
+                        return True, str(filepath), False
                     else:
                         logger.warning(f"Downloaded but could not find matching file for year {year}")
-                        return False, None
+                        return False, None, False
                 else:
                     # Log where we looked for debugging
                     searched_paths = [str(root / "sec-edgar-filings" / cik_formatted / "10-K") for root in possible_roots]
                     logger.warning(f"sec-edgar-filings directory not found for CIK {cik_formatted}. Searched: {searched_paths}")
-                    return False, None
+                    return False, None, False
             else:
                 logger.warning(f"No 10-K found for CIK {cik_formatted}, year {year}")
-                return False, None
+                return False, None, False
 
         except Exception as e:
             logger.error(f"Error downloading 10-K for CIK {cik}, year {year}: {e}")
-            return False, None
+            return False, None, False
 
     def download_batch(
         self,
@@ -299,10 +299,10 @@ class SECDownloader:
             year = row['year']
 
             try:
-                success, filepath = self.download_10k(cik, year, skip_if_exists)
+                success, filepath, was_skipped = self.download_10k(cik, year, skip_if_exists)
 
                 if success:
-                    if filepath and skip_if_exists and Path(filepath).exists():
+                    if was_skipped:
                         results['skipped'].append({'cik': cik, 'year': year, 'path': filepath})
                     else:
                         results['successful'].append({'cik': cik, 'year': year, 'path': filepath})

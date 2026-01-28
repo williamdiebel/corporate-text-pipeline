@@ -49,17 +49,20 @@ Download a single 10-K filing.
 - `skip_if_exists` (bool): Skip if file already exists
 
 **Returns**:
-- `(success: bool, filepath: str | None)`
+- `(success: bool, filepath: str | None, was_skipped: bool)`
 
 **Example**:
 ```python
-success, filepath = downloader.download_10k(
+success, filepath, was_skipped = downloader.download_10k(
     cik="1750",
     year=2020
 )
 
 if success:
-    print(f"Downloaded to: {filepath}")
+    if was_skipped:
+        print(f"Already exists: {filepath}")
+    else:
+        print(f"Downloaded to: {filepath}")
 else:
     print("Download failed")
 ```
