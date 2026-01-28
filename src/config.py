@@ -53,7 +53,11 @@ def load_config(config_path=None):
     if collaborator:
         config['collaborator'] = collaborator
         # Each collaborator's data goes in their own subfolder
-        collaborator_data_root = data_root / collaborator
+        # But don't double-up if data_root already ends with collaborator name
+        if data_root.name.lower() == collaborator:
+            collaborator_data_root = data_root
+        else:
+            collaborator_data_root = data_root / collaborator
     else:
         collaborator_data_root = data_root
 
