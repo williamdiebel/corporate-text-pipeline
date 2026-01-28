@@ -1,80 +1,56 @@
-# data/ - Where Files Are Stored
+# data/ - Data Configuration
 
-**All downloaded and processed files go here**
-
----
-
-## Collaborative Setup: Shared Dropbox Folder
-
-For team collaboration, data files are stored in a **shared Dropbox folder** rather than locally. This allows all collaborators to access the same downloaded and processed files.
-
-### Setting Up Your Data Path
-
-1. **Get access** to the shared Dropbox folder from Will
-2. **Configure your path** in `config.yaml`:
-
-```yaml
-# Set to your Dropbox path
-data_root: "/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Mac
-# data_root: "C:/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Windows
-```
-
-Or set the `DATA_ROOT` environment variable:
-```bash
-export DATA_ROOT="/Users/YourName/Dropbox/corporate-text-pipeline-data"
-```
-
-3. **Verify it's working**:
-```bash
-# The scripts will now read/write to Dropbox
-download-10k --batch-size 1  # Downloads to Dropbox folder
-```
-
-### If data_root is NOT set
-
-When `data_root` is null/empty in config.yaml, scripts will use the local `data/` directory (this folder). This is fine for testing but won't sync with collaborators.
+**This directory contains only configuration files. Actual data lives in Dropbox.**
 
 ---
 
-## For Students & Research Assistants
-
-**You'll check the data folder (local or Dropbox) to see what's been downloaded and processed, but you won't edit files here directly.**
-
----
-
-## 📚 What's in This Folder?
+## What's Here
 
 ```
 data/
-├── firm_lists/              # Input: Which firms to download
-│   └── target_firm_years.csv
-│
-├── raw/                     # Downloaded 10-K filings
-│   └── 10k/
-│       ├── *.html files (one per firm-year)
-│       └── download_logs/
-│
-├── processed/               # Cleaned text sections
-│   ├── cleaned/
-│   │   ├── *_item_1.txt
-│   │   ├── *_item_1a.txt
-│   │   └── *_item_7.txt
-│   └── scores/             # Future: LLM scores
-│
-└── archive/                # Old/backup data
+├── firm_lists/                 # Git-tracked input files
+│   └── target_firm_years.csv   # List of firm-years to process
+└── README.md                   # This file
 ```
 
 ---
 
-## 📋 What Each Folder Does
+## Where Data Files Live
 
-### `firm_lists/` - The Target List
+All downloaded and processed files are stored in a **shared Dropbox folder**, not in this directory. This keeps the git repository lightweight.
 
-**What it is**: A CSV file listing which firm-years to download
+### Dropbox Structure
 
-**File**: `target_firm_years.csv`
+```
+Dropbox/corporate-text-pipeline-data/
+├── raw/
+│   └── 10k/                    # Downloaded 10-K HTML files
+│       └── download_logs/      # Download status logs
+├── processed/
+│   ├── cleaned/                # Extracted/cleaned text files
+│   └── scores/                 # LLM scoring output
+└── logs/                       # Processing logs
+```
 
-**Format**:
+### Configuration
+
+Set your Dropbox path in `config.yaml`:
+
+```yaml
+data_root: "/Users/YourName/Dropbox/corporate-text-pipeline-data"
+```
+
+See [docs/SETUP.md](../docs/SETUP.md) for full configuration instructions.
+
+---
+
+## firm_lists/
+
+This directory contains input CSV files specifying which firm-years to process.
+
+**Main file:** `target_firm_years.csv`
+
+**Format:**
 ```csv
 cik,year
 1750,2020
@@ -82,244 +58,23 @@ cik,year
 320193,2020
 ```
 
-**Statistics**:
-- Total firm-years: ~8,673
-- Unique firms: ~1,100 US manufacturing firms
-
-**When you'll use it**: Usually you won't edit this - Will creates it
-
----
-
-### `raw/10k/` - Downloaded Files
-
-**What it is**: Raw HTML 10-K filings from SEC website
-
-**File naming**: `{CIK}_{YEAR}_10K.html`
-- Example: `0000001750_2020_10K.html`
-
-**File sizes**:
-- Each file: ~500KB to 2MB
-- Full dataset: ~4-17 GB
-
-**When you'll check it**:
-```bash
-# Count how many files downloaded
-ls data/raw/10k/*.html | wc -l
-
-# Find specific firm
-ls data/raw/10k/0000001750_*.html
-
-# Check download results
-cat data/raw/10k/download_logs/summary_*.txt
-```
+**Statistics:**
+- ~8,673 firm-year observations
+- ~1,100 unique US manufacturing firms
+- Years: 2006-2022
 
 ---
 
-### `processed/cleaned/` - Processed Text
+## What NOT to Put Here
 
-**What it is**: Cleaned text sections extracted from 10-Ks
+Do not add to this directory:
+- Downloaded 10-K files (go to Dropbox)
+- Processed text files (go to Dropbox)
+- Score outputs (go to Dropbox)
+- Large files of any kind
 
-**File naming**: `{CIK}_{YEAR}_10K_{SECTION}.txt`
-- Example: `0000001750_2020_10K_item_1a.txt`
-
-**Sections**:
-- `item_1.txt` - Business description
-- `item_1a.txt` - Risk Factors (most important for supply chain)
-- `item_7.txt` - Management Discussion & Analysis
-
-**File sizes**:
-- Each section: ~10-150 KB
-- Much smaller than raw HTML files
-
-**When you'll check it**:
-```bash
-# Count processed sections
-ls data/processed/cleaned/*_item_*.txt | wc -l
-
-# Read a specific section
-head -n 100 data/processed/cleaned/0000001750_2020_10K_item_1a.txt
-
-# Check processing results
-cat data/processed/cleaned/processing_logs/processing_summary_*.txt
-```
+These are gitignored and should be in the shared Dropbox folder.
 
 ---
 
-## 🔍 Checking Your Progress
-
-### How Many Files Downloaded?
-
-```bash
-# Count raw 10-Ks
-ls data/raw/10k/*.html | wc -l
-```
-
-### How Many Files Processed?
-
-```bash
-# Count Item 1A sections (Risk Factors)
-ls data/processed/cleaned/*_item_1a.txt | wc -l
-```
-
-### What Failed?
-
-```bash
-# Check failed downloads
-cat data/raw/10k/download_logs/failed_*.csv
-
-# Check failed processing
-grep "False" data/processed/cleaned/processing_logs/processing_results_*.csv
-```
-
-### Find Specific Firm
-
-```bash
-# All filings for CIK 1750
-ls data/raw/10k/0000001750_*.html
-
-# All 2020 filings
-ls data/raw/10k/*_2020_*.html
-
-# Item 1A for firm 1750 in 2020
-cat data/processed/cleaned/0000001750_2020_10K_item_1a.txt | head -n 50
-```
-
----
-
-## ⚠️ Important: What NOT to Do
-
-### ❌ Don't Commit Data to Git
-
-**These folders should NEVER be committed to GitHub**:
-- `data/raw/` (too large, can re-download)
-- `data/processed/` (generated files)
-- `data/archive/` (backups)
-
-**Only commit**:
-- ✅ `data/firm_lists/` (input data)
-- ✅ This README file
-
-The `.gitignore` file handles this automatically, but don't force-add these folders.
-
-### ❌ Don't Edit Files Manually
-
-Files in `data/raw/` and `data/processed/` are generated by scripts. Don't edit them by hand.
-
-If something looks wrong:
-1. Check the logs
-2. Ask Will
-3. Re-run the script
-
----
-
-## 💾 Disk Space
-
-### How Much Space You'll Need
-
-For the full dataset (~8,600 firm-years):
-
-| Folder | Size |
-|--------|------|
-| `raw/10k/` | 4-17 GB |
-| `processed/cleaned/` | 500 MB-2.5 GB |
-| **Total** | **5-20 GB** |
-
-Add 20-30% buffer for logs and temporary files.
-
-### Checking Disk Space
-
-```bash
-# Check available space
-df -h
-
-# Check data folder size
-du -sh data/
-du -sh data/*/
-```
-
----
-
-## 🗂️ File Naming Explained
-
-### Raw 10-K Files
-
-**Format**: `{CIK}_{YEAR}_10K.html`
-
-**Example**: `0000001750_2020_10K.html`
-- `0000001750` = CIK (Central Index Key), zero-padded to 10 digits
-- `2020` = Fiscal year
-- `10K` = Form type
-- `.html` = File format
-
-### Processed Section Files
-
-**Format**: `{CIK}_{YEAR}_10K_{SECTION}.txt`
-
-**Example**: `0000001750_2020_10K_item_1a.txt`
-- `0000001750` = CIK
-- `2020` = Fiscal year
-- `10K` = Form type
-- `item_1a` = Section (Risk Factors)
-- `.txt` = Plain text format
-
----
-
-## 📊 Quality Control Tips
-
-### Before Reporting Results to Will
-
-Run these checks:
-
-```bash
-# 1. Validate everything
-validate-data --report
-
-# 2. Check the report
-cat validation_reports/validation_report_*.txt
-
-# 3. Count successes
-echo "Raw files: $(ls data/raw/10k/*.html | wc -l)"
-echo "Item 1A files: $(ls data/processed/cleaned/*_item_1a.txt | wc -l)"
-
-# 4. Look for failures
-cat data/raw/10k/download_logs/failed_*.csv
-```
-
-### Expected Success Rates
-
-- **Downloads**: >95% success
-- **Processing**: >90% success
-- **Section extraction**: >85% for Item 1A
-
-If your rates are lower, check the logs and ask Will.
-
----
-
-## 🔧 Maintenance
-
-### You Probably Won't Need These
-
-But if Will asks you to clean up old files:
-
-```bash
-# Remove old logs (keep last 30 days)
-find data/raw/10k/download_logs -name "*.csv" -mtime +30 -delete
-
-# Move old data to archive
-mv data/processed/scores/old_scores.csv data/archive/
-```
-
----
-
-## 🔍 Main Documentation
-
-For complete details, see:
-
-- **[Main README](../README.md)** - Project overview
-- **[Setup Guide](../docs/SETUP.md)** - Installation instructions
-- **[Scripts README](../scripts/README.md)** - How to run scripts
-
----
-
-**Last Updated**: January 2026
-**Version**: 1.0
+*Last Updated: January 2026*

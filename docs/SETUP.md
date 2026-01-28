@@ -1,494 +1,205 @@
-# Setup Guide - Corporate Text Pipeline
+# Setup Guide
 
-**Complete setup instructions for team members**
-
-This guide will walk you through setting up the pipeline on your computer, from installing Python to running your first download.
+**First-time installation for the Corporate Text Pipeline**
 
 ---
 
-## 📋 Table of Contents
+## Prerequisites
 
-1. [Before You Start](#before-you-start)
-2. [Step 1: Install Prerequisites](#step-1-install-prerequisites)
-3. [Step 2: Get the Code](#step-2-get-the-code)
-4. [Step 3: Set Up Python Environment](#step-3-set-up-python-environment)
-5. [Step 4: Install the Pipeline](#step-4-install-the-pipeline)
-6. [Step 5: Configure Your Settings](#step-5-configure-your-settings)
-7. [Step 6: Test Everything Works](#step-6-test-everything-works)
-8. [Troubleshooting](#troubleshooting)
-9. [Daily Workflow](#daily-workflow)
+Before starting, you'll need:
+
+- **Python 3.9+** - [Download](https://www.python.org/downloads/)
+- **Git** - [Download](https://git-scm.com/downloads)
+- **VS Code** (recommended) - [Download](https://code.visualstudio.com/)
+- **Dropbox access** - Request from Will
 
 ---
 
-## 🎯 Before You Start
+## Step 1: Install Python
 
-### What You'll Need
-
-- **Computer**: Mac, Windows, or Linux
-- **Internet connection**: For downloading Python and filings
-- **Text editor**: We recommend [VS Code](https://code.visualstudio.com/) (free)
-- **30 minutes**: For first-time setup
-
-### What This Guide Does
-
-By the end, you'll have:
-- ✅ Python installed
-- ✅ The pipeline code on your computer
-- ✅ All required packages installed
-- ✅ Ability to download 10-K filings
-- ✅ Ability to process and validate data
-
----
-
-## 📥 Step 1: Install Prerequisites
-
-### 1.1 Install Python
-
-**Check if you have Python:**
-
+**Check if already installed:**
 ```bash
 python3 --version
 ```
 
-If you see `Python 3.9.x` or higher, you're good! Skip to [1.2](#12-install-git).
+If you see `Python 3.9.x` or higher, skip to Step 2.
 
-**If not, install Python:**
-
-- **Mac**: Download from [python.org](https://www.python.org/downloads/) or use Homebrew:
-  ```bash
-  brew install python@3.11
-  ```
-
-- **Windows**: Download from [python.org](https://www.python.org/downloads/)
-  - ⚠️ **Important**: Check "Add Python to PATH" during installation
-
-- **Linux**:
-  ```bash
-  sudo apt update
-  sudo apt install python3.11 python3.11-venv
-  ```
-
-**Verify installation:**
-```bash
-python3 --version
-# Should show: Python 3.9.x or higher
-```
-
-### 1.2 Install Git
-
-**Check if you have Git:**
-
-```bash
-git --version
-```
-
-If you see `git version 2.x.x`, you're good! Skip to [Step 2](#step-2-get-the-code).
-
-**If not, install Git:**
-
-- **Mac**:
-  ```bash
-  brew install git
-  # OR download from: https://git-scm.com/download/mac
-  ```
-
-- **Windows**: Download from [git-scm.com](https://git-scm.com/download/win)
-
-- **Linux**:
-  ```bash
-  sudo apt install git
-  ```
-
-**Verify installation:**
-```bash
-git --version
-```
-
-### 1.3 Install a Text Editor (Optional but Recommended)
-
-Download [VS Code](https://code.visualstudio.com/) - it's free and makes editing files much easier.
+**Install Python:**
+- **Mac:** `brew install python@3.11` or download from python.org
+- **Windows:** Download from python.org (check "Add Python to PATH" during install)
+- **Linux:** `sudo apt install python3.11 python3.11-venv`
 
 ---
 
-## 📂 Step 2: Get the Code
+## Step 2: Install Git
 
-### 2.1 Choose a Location
+**Check if already installed:**
+```bash
+git --version
+```
 
-Decide where you want to put the project. Good choices:
-- `~/Documents/research/`
-- `~/projects/`
-- `~/Desktop/` (if you like seeing it)
+If you see a version number, skip to Step 3.
 
-### 2.2 Open Terminal
+**Install Git:**
+- **Mac:** `brew install git` or download from git-scm.com
+- **Windows:** Download from git-scm.com
+- **Linux:** `sudo apt install git`
 
-- **Mac**: Press `Cmd+Space`, type "Terminal", press Enter
-- **Windows**: Press `Win+R`, type "cmd", press Enter
-- **Linux**: Press `Ctrl+Alt+T`
+---
 
-### 2.3 Navigate to Your Chosen Location
+## Step 3: Configure Git Identity
 
 ```bash
-# Example: Documents folder
+git config --global user.name "Your Name"
+git config --global user.email "your.email@university.edu"
+```
+
+---
+
+## Step 4: Clone the Repository
+
+```bash
+# Navigate to where you want the project
 cd ~/Documents
 
-# Or create a new research folder
-mkdir -p ~/Documents/research
-cd ~/Documents/research
-```
-
-### 2.4 Clone the Repository
-
-```bash
+# Clone the repository
 git clone https://github.com/williamdiebel/corporate-text-pipeline.git
-```
 
-**What this does**: Downloads all the project files to your computer
-
-### 2.5 Enter the Project Folder
-
-```bash
+# Enter the project folder
 cd corporate-text-pipeline
 ```
 
-**Verify you're in the right place:**
-```bash
-ls
-# You should see: src/, scripts/, data/, docs/, config.yaml, etc.
-```
+**Verify:** You should see `src/`, `scripts/`, `docs/`, `config.yaml`, etc.
 
 ---
 
-## 🐍 Step 3: Set Up Python Environment
-
-### 3.1 What is a Virtual Environment?
-
-Think of it as a separate workspace for this project. It keeps this project's tools separate from other Python projects.
-
-**Analogy**: It's like having a separate toolbox for woodworking vs. plumbing - you don't mix them up!
-
-### 3.2 Create the Virtual Environment
+## Step 5: Create Virtual Environment
 
 ```bash
+# Create virtual environment
 python3 -m venv venv
-```
 
-**What this does**: Creates a folder called `venv` with a fresh Python setup
-
-**This takes about 1 minute** ⏱️
-
-### 3.3 Activate the Virtual Environment
-
-**Mac/Linux:**
-```bash
+# Activate it (Mac/Linux)
 source venv/bin/activate
-```
 
-**Windows:**
-```bash
+# Activate it (Windows)
 venv\Scripts\activate
 ```
 
-**How to know it worked:**
-You should see `(venv)` at the start of your terminal line:
-```
-(venv) your-computer:corporate-text-pipeline username$
-```
-
-### 3.4 Upgrade pip (Python's package installer)
-
-```bash
-pip install --upgrade pip
-```
+**Verify:** You should see `(venv)` at the start of your terminal prompt.
 
 ---
 
-## 📦 Step 4: Install the Pipeline
-
-### 4.1 Install Everything
+## Step 6: Install the Pipeline
 
 ```bash
+# Upgrade pip first
+pip install --upgrade pip
+
+# Install the pipeline
 pip install -e .
 ```
 
-**What this does:**
-- Installs all required packages (requests, pandas, beautifulsoup4, etc.)
-- Makes the pipeline tools available as commands
-- Sets up the project so you can run scripts
-
-**This takes 3-5 minutes** ⏱️
-
-You'll see a lot of text scrolling by - that's normal!
-
-### 4.2 Verify Installation
-
+**Verify installation:**
 ```bash
-# Check that commands are available
 download-10k --help
 process-batch --help
-validate-data --help
 ```
 
-If these show help text, you're all set! ✅
+If these show help text, installation succeeded.
 
 ---
 
-## ⚙️ Step 5: Configure Your Settings
+## Step 7: Configure Settings
 
-### 5.1 Open the Configuration File
+### 7a: Set Your SEC Email
 
-The SEC requires you to identify yourself when downloading files (it's their policy, not ours!).
-
-**Open `config.yaml` in your text editor:**
-
-- **VS Code**: `code config.yaml`
-- **Other editor**: Just open the file in any text editor
-
-### 5.2 Add Your Email
-
-Find this line (around line 13):
+The SEC requires identification. Open `config.yaml` and update:
 
 ```yaml
 sec_edgar:
-  rate_limit: 10
-  user_agent: "william.diebel@moore.sc.edu"  # ← CHANGE THIS
+  user_agent: "your.name@university.edu"  # Use YOUR email
 ```
 
-**Replace with YOUR email:**
+### 7b: Set Dropbox Data Path
+
+Set where data files will be stored:
 
 ```yaml
-sec_edgar:
-  rate_limit: 10
-  user_agent: "your.name@university.edu"  # ← Your actual email
+data_root: "/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Mac
+# data_root: "C:/Users/YourName/Dropbox/corporate-text-pipeline-data"  # Windows
 ```
 
-### 5.3 Save the File
+**Important:**
+- Use the exact path to your Dropbox folder
+- Create the folder if it doesn't exist
+- Ask Will for access to the shared Dropbox folder
 
-Press `Cmd+S` (Mac) or `Ctrl+S` (Windows)
+### 7c: Verify Dropbox Structure
 
-**Why this matters**: The SEC blocks requests without a valid email. Using a real email ensures downloads work.
+Your Dropbox data folder should have this structure (Will creates this):
+
+```
+corporate-text-pipeline-data/
+├── raw/
+│   └── 10k/
+├── processed/
+│   ├── cleaned/
+│   └── scores/
+└── logs/
+```
 
 ---
 
-## ✅ Step 6: Test Everything Works
-
-### 6.1 Test Download (Small Batch)
-
-Let's download 5 test filings to make sure everything works:
+## Step 8: Test Everything
 
 ```bash
-download-10k --batch-size 5
+# Test download (small batch)
+download-10k --batch-size 3
 ```
 
-**What you should see:**
+**Expected output:**
 ```
-Downloading 5 10-K filings to data/raw/10k
-Rate limit: 10 requests/second
-Skip existing: True
-
-Progress: 5/5 | Success: 5 | Failed: 0 | Skipped: 0
-
-======================================================================
-Download Complete!
-======================================================================
-Total attempted: 5
-Successful: 5
-Failed: 0
-Skipped: 0
+Downloading 3 10-K filings...
+Progress: 3/3 | Success: 3 | Failed: 0 | Skipped: 0
 ```
 
-**If it works**: Congratulations! 🎉 Setup is complete!
-
-**If it fails**: See [Troubleshooting](#troubleshooting) below
-
-### 6.2 Check Downloaded Files
-
+**Verify files appeared in Dropbox:**
 ```bash
-ls data/raw/10k/
+ls /path/to/Dropbox/corporate-text-pipeline-data/raw/10k/
 ```
-
-You should see files like:
-```
-0000001750_2020_10K.html
-0000001750_2021_10K.html
-...
-```
-
-### 6.3 Test Processing
-
-```bash
-process-batch --batch-size 5
-```
-
-This extracts and cleans text from the downloaded files.
-
-### 6.4 Test Validation
-
-```bash
-validate-data
-```
-
-This checks that everything downloaded and processed correctly.
 
 ---
 
-## 🆘 Troubleshooting
+## You're Done!
 
-### Problem: "python3: command not found"
+Setup is complete. Next steps:
 
-**Solution**: Python isn't installed or not in your PATH
-```bash
-# Try just 'python' instead
-python --version
-
-# If that doesn't work, reinstall Python
-# Mac: brew install python@3.11
-# Windows: Download from python.org
-```
-
-### Problem: "pip: command not found"
-
-**Solution**:
-```bash
-# Try with python3 -m
-python3 -m pip install -e .
-```
-
-### Problem: "(venv) doesn't appear"
-
-**Solution**: Virtual environment didn't activate
-
-**Mac/Linux:**
-```bash
-source venv/bin/activate
-```
-
-**Windows:**
-```bash
-venv\Scripts\activate
-```
-
-### Problem: "download-10k: command not found"
-
-**Solutions to try:**
-
-1. **Make sure venv is activated** (should see `(venv)`)
-2. **Reinstall:**
-   ```bash
-   pip install -e .
-   ```
-3. **Use the full path:**
-   ```bash
-   python scripts/download_10k.py --batch-size 5
-   ```
-
-### Problem: "403 Forbidden" error when downloading
-
-**Cause**: Invalid or missing email in config.yaml
-
-**Solution**:
-1. Open `config.yaml`
-2. Change `user_agent` to YOUR real email
-3. Save file
-4. Try again
-
-### Problem: "ModuleNotFoundError: No module named 'src'"
-
-**Solution**: Install the package
-```bash
-pip install -e .
-```
-
-### Problem: Downloads are slow
-
-**This is normal!** The SEC limits us to 10 requests per second.
-
-- 100 filings ≈ 10-15 seconds
-- 1,000 filings ≈ 2-3 minutes
-- 8,600 filings ≈ 15-30 minutes
+1. Read the [Workflow Guide](WORKFLOW_GUIDE.md) for daily operations
+2. Review the [Quick Start](QUICK_START.md) for command reference
+3. Check [Troubleshooting](TROUBLESHOOTING.md) if you hit issues
 
 ---
 
-## 🔄 Daily Workflow
+## Quick Reference: Activating Your Environment
 
-Once setup is complete, here's what you'll do each time you work on the project:
-
-### Starting Your Work Session
+Every time you work on the project:
 
 ```bash
-# 1. Navigate to project
-cd ~/Documents/research/corporate-text-pipeline
-
-# 2. Activate virtual environment
+cd ~/Documents/corporate-text-pipeline
 source venv/bin/activate  # Mac/Linux
-# OR
-venv\Scripts\activate     # Windows
-
-# 3. Pull latest changes (if working with team)
+# venv\Scripts\activate   # Windows
 git pull origin main
-
-# 4. Start working!
-download-10k --batch-size 100
 ```
 
-### Ending Your Work Session
+---
 
-```bash
-# 1. Deactivate virtual environment
-deactivate
+## Team Contacts
 
-# 2. Close terminal (optional)
-```
-
-**That's it!** Simple workflow for daily use.
+- **Will Diebel** (PI): william.diebel@moore.sc.edu
+- **Katelyn Thompson** (PhD): katelyn.thompson@grad.moore.sc.edu
+- **Lachlan Carroll** (RA): ldc2@email.sc.edu
 
 ---
 
-## 🎓 Next Steps
-
-Now that setup is complete:
-
-1. ✅ Read the main [README.md](../README.md) for project overview
-2. ✅ Read [docs/USAGE.md](USAGE.md) for how to use each tool
-3. ✅ Read [docs/github_guide.md](github_guide.md) for Git/GitHub workflows
-4. ✅ Try downloading a larger batch: `download-10k --batch-size 50`
-
----
-
-## 📚 Additional Resources
-
-### For Complete Beginners
-
-- [What is a terminal/command line?](https://www.youtube.com/watch?v=5XgBd6rjuDQ)
-- [Python basics](https://docs.python.org/3/tutorial/)
-- [Git basics](https://www.youtube.com/watch?v=8JJ101D3knE)
-
-### Project Documentation
-
-- [Main README](../README.md) - Project overview
-- [Usage Guide](USAGE.md) - How to use tools
-- [GitHub Guide](github_guide.md) - Team Git workflow
-- [Downloader Guide](DOWNLOADER_USAGE.md) - Download details
-
-### Getting Help
-
-1. **Check the docs** - Most answers are in the guides above
-2. **Check logs** - Look in `logs/` folder for error details
-3. **Ask the team** - Email Will or create a GitHub Issue
-
----
-
-## ✨ You're All Set!
-
-Setup is complete! You can now:
-
-✅ Download 10-K filings
-✅ Process and clean text
-✅ Validate data quality
-✅ Work with the team via Git/GitHub
-
-**Welcome to the team!** 🎉
-
----
-
-**Last Updated**: January 2026
-**Version**: 1.0
+*Last Updated: January 2026*
