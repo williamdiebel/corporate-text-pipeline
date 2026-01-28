@@ -30,6 +30,12 @@ class TenKParser:
     embedded documents with SEC headers.
     """
 
+    # Part boundary patterns for finding PART I, PART II, etc.
+    PART_PATTERNS = {
+        'part_i': r'(?:^|\n)\s*PART\s+I(?:\s|$|[^IV])',
+        'part_ii': r'(?:^|\n)\s*PART\s+II(?:\s|$)',
+    }
+
     # Section patterns for different 10-K formats
     SECTION_PATTERNS = {
         'item_1': [
@@ -81,6 +87,56 @@ class TenKParser:
             min_section_length: Minimum character length for valid section (default: 1000)
         """
         self.min_section_length = min_section_length
+
+    def _find_part_position(self, text: str, part: str) -> int:
+        """
+        Find the position of a PART marker in text.
+
+        Args:
+            text: Full 10-K text
+            part: Part to find ('part_i' or 'part_ii')
+
+        Returns:
+            Position after the PART marker, or 0 if not found
+        """
+        pattern = self.PART_PATTERNS.get(part, '')
+        if not pattern:
+            return 0
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        return match.end() if match else 0
+
+    def _is_back_reference(self, text: str, match_start: int) -> bool:
+        """
+        Check if a match is a back-reference rather than a true section header.
+
+        Back-references like "See Item 1. Business above" should be skipped.
+
+        Args:
+            text: Full 10-K text
+            match_start: Position where the match starts
+
+        Returns:
+            True if this appears to be a back-reference, False if likely a true header
+        """
+        # Check immediate prefix (15 chars) for words that directly precede "Item"
+        immediate_prefix = text[max(0, match_start - 15):match_start].lower()
+        immediate_indicators = ['see ', 'under ', 'in "', "in '", 'to ']
+        if any(immediate_prefix.endswith(ind) or ind in immediate_prefix for ind in immediate_indicators):
+            return True
+
+        # Check wider prefix (50 chars) for specific back-reference phrases
+        wider_prefix = text[max(0, match_start - 50):match_start].lower()
+        back_ref_phrases = [
+            'refer to ',
+            'described in ',
+            'set forth in ',
+            'discussed in ',
+            'included in ',
+            'see "',
+            "see '",
+            'pursuant to '
+        ]
+        return any(phrase in wider_prefix for phrase in back_ref_phrases)
 
     def _extract_10k_document(self, content: str) -> str:
         """
@@ -197,6 +253,12 @@ class TenKParser:
         """
         Extract a specific section from 10-K text.
 
+        Uses a positional-contextual approach:
+        1. Find the relevant PART boundary (PART I for Items 1/1A, PART II for Item 7)
+        2. Search only AFTER that boundary to skip table of contents
+        3. Take the FIRST valid match (not last) since actual sections come right after Part marker
+        4. Skip back-references like "See Item 1. Business above"
+
         Args:
             text: Full 10-K text
             section_name: Section to extract ('item_1', 'item_1a', 'item_7')
@@ -206,22 +268,33 @@ class TenKParser:
         """
         text_lower = text.lower()
 
-        # Find all potential section starts (skip table of contents entries)
+        # Determine search boundary based on section
+        if section_name in ['item_1', 'item_1a']:
+            search_start = self._find_part_position(text, 'part_i')
+        elif section_name == 'item_7':
+            search_start = self._find_part_position(text, 'part_ii')
+        else:
+            search_start = 0
+
+        # Find candidates AFTER the part boundary, excluding back-references
         candidates = []
         for pattern in self.SECTION_PATTERNS[section_name]:
-            for match in re.finditer(pattern, text_lower, re.IGNORECASE):
-                candidates.append(match)
+            for match in re.finditer(pattern, text_lower[search_start:], re.IGNORECASE):
+                actual_pos = search_start + match.start()
+                # Skip back-references like "See Item 1. Business above"
+                if not self._is_back_reference(text, actual_pos):
+                    candidates.append((actual_pos, match.end() - match.start()))
 
         if not candidates:
             logger.debug(f"Could not find start of {section_name}")
             return None
 
-        # Try each candidate, starting from the last one (more likely to be the actual section)
-        # Table of contents entries appear early, actual sections appear later
-        candidates.sort(key=lambda m: m.start(), reverse=True)
+        # Sort by position - take FIRST valid candidate (not last)
+        # Actual sections come right after the Part marker, back-references come later
+        candidates.sort(key=lambda x: x[0])
 
-        for match in candidates:
-            start_pos = match.end()
+        for actual_pos, match_len in candidates:
+            start_pos = actual_pos + match_len
 
             # Skip to end of current line to avoid partial header text
             # Find the next newline after the match
@@ -249,8 +322,8 @@ class TenKParser:
 
         # If no candidate produced valid section, try the first match with relaxed end detection
         if candidates:
-            match = min(candidates, key=lambda m: m.start())
-            start_pos = match.end()
+            actual_pos, match_len = candidates[0]
+            start_pos = actual_pos + match_len
 
             # Skip to end of current line to avoid partial header text
             next_newline = text.find('\n', start_pos)
