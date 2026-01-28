@@ -3,6 +3,13 @@ project_name: "Corporate Text Pipeline - Supply Chain Transparency"
 description: "Automated pipeline for downloading and analyzing 10-K filings for supply chain transparency measures"
 
 # =============================================================================
+# COLLABORATOR SETTINGS - Each team member sets their name here
+# =============================================================================
+# This determines your personal folder within the shared Dropbox and your firm list.
+# Options: "will", "katelyn", "lachlan"
+collaborator: null  # <-- UPDATE THIS to your name (will, katelyn, or lachlan)
+
+# =============================================================================
 # DATA ROOT - For collaborative work with shared Dropbox folder
 # =============================================================================
 # Set this to your shared Dropbox folder path. Leave empty/null to use local data/ directory.
@@ -11,13 +18,14 @@ description: "Automated pipeline for downloading and analyzing 10-K filings for 
 #   Mac:     "/Users/YourName/Dropbox/corporate-text-pipeline-data"
 #   Linux:   "/home/YourName/Dropbox/corporate-text-pipeline-data"
 #
+# Your data will be stored in: {data_root}/{collaborator}/
 # You can also override this via environment variable: DATA_ROOT
 data_root: null  # <-- UPDATE THIS to your Dropbox path
 
 # FIRM-YEAR SPECIFICATIONS
-# Your input CSV should have columns: CIK, Year, EventID, TreatmentStatus
-# This allows you to specify exact firm-year combinations around event windows
-firm_list_file: "data/firm_lists/pilot_fti_firms.csv"
+# Each collaborator has their own assigned firm-year list
+# Update to match your collaborator name: cik_year_will.csv, cik_year_katelyn.csv, cik_year_lachlan.csv
+firm_list_file: "data/firm_lists/cik_year_YOUR_NAME.csv"  # <-- UPDATE to your file
 
 # DOWNLOAD SETTINGS
 sec_edgar:

@@ -48,13 +48,24 @@ def load_config(config_path=None):
 
     config['data_root'] = str(data_root)
 
-    # Update paths to use data_root
+    # Get collaborator name for per-person folder structure
+    collaborator = config.get('collaborator', '').lower()
+    if collaborator:
+        config['collaborator'] = collaborator
+        # Each collaborator's data goes in their own subfolder
+        collaborator_data_root = data_root / collaborator
+    else:
+        collaborator_data_root = data_root
+
+    config['collaborator_data_root'] = str(collaborator_data_root)
+
+    # Update paths to use collaborator's data root
     if 'paths' in config:
         for key, value in config['paths'].items():
             if value.startswith('data/'):
-                # Replace 'data/' prefix with data_root
+                # Replace 'data/' prefix with collaborator's data root
                 relative_path = value[5:]  # Remove 'data/' prefix
-                config['paths'][key] = str(data_root / relative_path)
+                config['paths'][key] = str(collaborator_data_root / relative_path)
 
     return config
 
