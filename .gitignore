@@ -207,6 +207,11 @@ marimo/_lsp/
 __marimo__/
 
 # =============================================================================
+# LOCAL CONFIGURATION - Each user maintains their own config.yaml
+# =============================================================================
+config.yaml
+
+# =============================================================================
 # DATA FILES - Too large for git, stored in shared Dropbox
 # =============================================================================
 # Raw downloaded 10-K filings (4-17 GB at full scale)

@@ -12,7 +12,7 @@ description: "Automated pipeline for downloading and analyzing 10-K filings for 
 #   Linux:   "/home/YourName/Dropbox/corporate-text-pipeline-data"
 #
 # You can also override this via environment variable: DATA_ROOT
-data_root: "/Users/william.diebel/Dropbox/corporate-text-pipeline-data"  # Set to your Dropbox path, or leave null for local data/
+data_root: null  # <-- UPDATE THIS to your Dropbox path
 
 # FIRM-YEAR SPECIFICATIONS
 # Your input CSV should have columns: CIK, Year, EventID, TreatmentStatus
@@ -22,11 +22,11 @@ firm_list_file: "data/firm_lists/pilot_fti_firms.csv"
 # DOWNLOAD SETTINGS
 sec_edgar:
   rate_limit: 10  # requests per second (SEC limit)
-  user_agent: "william.diebel@moore.sc.edu"  # UPDATE with your actual email
+  user_agent: "your.email@university.edu"  # <-- UPDATE with your actual email (required by SEC)
   filing_types:
     - "10-K"      # Annual report
     # - "10-K/A"  # Amended annual report (uncomment if needed)
-  
+
 # BATCH PROCESSING
 batch_size: 100  # firm-years per batch for your RA to process
 max_retries: 3   # retry failed downloads
@@ -46,7 +46,7 @@ text_extraction:
     - "item_1"    # Business description
     - "item_1a"   # Risk factors (KEY for supply chain disclosures)
     - "item_7"    # MD&A (Management Discussion & Analysis)
-  
+
   # Minimum text length to consider valid (filters out extraction errors)
   min_text_length: 1000  # characters
 
@@ -80,6 +80,6 @@ scoring:
     depth: "Supply chain depth (Tier-1 only vs multi-tier)"
     verification: "Verification level (self-reported vs third-party audited)"
     quantitative: "Presence of quantitative metrics vs qualitative statements"
-  
+
   scale_min: 0
   scale_max: 10
